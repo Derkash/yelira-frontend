@@ -357,7 +357,7 @@ export default function Header() {
                   {item.submenu && activeMenu === item.slug && (
                     <div className="absolute top-full left-0 bg-white shadow-xl border-t min-w-[280px] py-6 px-6 animate-fadeIn">
                       {/* Simple submenu (like Soldes) */}
-                      {Array.isArray(item.submenu) && !item.submenu[0]?.title && (
+                      {Array.isArray(item.submenu) && !('title' in (item.submenu[0] || {})) && (
                         <div className="space-y-2">
                           {(item.submenu as Array<{ name: string; slug: string }>).map((subItem) => (
                             <Link
@@ -372,7 +372,7 @@ export default function Header() {
                       )}
 
                       {/* Grouped submenu (like Abaya) */}
-                      {Array.isArray(item.submenu) && item.submenu[0]?.title && (
+                      {Array.isArray(item.submenu) && ('title' in (item.submenu[0] || {})) && (
                         <div className="flex gap-10">
                           {(item.submenu as Array<{ title: string; items: Array<{ name: string; slug: string }> }>).map((group) => (
                             <div key={group.title}>
@@ -508,7 +508,7 @@ export default function Header() {
                           >
                             Voir tout {item.name}
                           </Link>
-                          {Array.isArray(item.submenu) && !item.submenu[0]?.title &&
+                          {Array.isArray(item.submenu) && !('title' in (item.submenu[0] || {})) &&
                             (item.submenu as Array<{ name: string; slug: string }>).map((sub) => (
                               <Link
                                 key={sub.slug}
@@ -519,7 +519,7 @@ export default function Header() {
                                 {sub.name}
                               </Link>
                             ))}
-                          {Array.isArray(item.submenu) && item.submenu[0]?.title &&
+                          {Array.isArray(item.submenu) && ('title' in (item.submenu[0] || {})) &&
                             (item.submenu as Array<{ title: string; items: Array<{ name: string; slug: string }> }>).map((group) => (
                               <div key={group.title} className="mt-3">
                                 <span className="text-[10px] font-bold tracking-wider uppercase text-gray-400">
