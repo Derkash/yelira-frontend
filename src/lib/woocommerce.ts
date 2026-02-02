@@ -1,7 +1,7 @@
 import { Product, Category, ProductsResponse, Variation } from '@/types/woocommerce';
 
 // WooCommerce API Configuration
-const WC_URL = 'https://www.yelira.fr/wp-json/wc/v3';
+const WC_URL = 'https://wp.yelira.fr/wp-json/wc/v3';
 const WC_KEY = 'ck_fda27c64ff65524550b3e0e6c59c1e3f0a7580a3';
 const WC_SECRET = 'cs_cb25ef00fb0afb0826ce8ea0258b70f86ef12f6b';
 
