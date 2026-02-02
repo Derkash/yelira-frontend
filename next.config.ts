@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
         pathname: '/wp-content/**',
       },
     ],
+    minimumCacheTTL: 60 * 60 * 24, // Cache images for 24 hours
+    formats: ['image/avif', 'image/webp'],
+  },
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
 };
 

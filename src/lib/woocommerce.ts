@@ -18,7 +18,7 @@ async function wcFetch<T>(endpoint: string, options: RequestInit = {}): Promise<
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    next: { revalidate: 60 }, // Cache for 60 seconds
+    next: { revalidate: 300 }, // Cache for 5 minutes
   });
 
   if (!response.ok) {
