@@ -236,12 +236,19 @@ const menuData = [
   },
 ];
 
+const announcementMessages = [
+  'Frais de port offert dès 69€ en point relais France et Belgique !',
+  'Livraison 24/48H en point relais',
+  'Retours gratuits sous 14 jours',
+];
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const { cart } = useCart();
 
   useEffect(() => {
@@ -252,26 +259,49 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Mobile: cycle through messages one by one
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % announcementMessages.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       {/* Top Promo Banner - Neyssa style */}
-      <div className="bg-[#1a1a1a] text-white py-2 overflow-hidden">
+      {/* Desktop: continuous marquee */}
+      <div className="hidden md:block bg-[#1a1a1a] text-white py-2 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center mx-8">
-              <span className="text-[11px] tracking-[0.12em] uppercase">
-                Frais de port offert dès 69€ en point relais France et Belgique !
-              </span>
-              <span className="mx-6 text-[#997a6e]">★</span>
-              <span className="text-[11px] tracking-[0.12em] uppercase">
-                Livraison 24/48H en point relais
-              </span>
-              <span className="mx-6 text-[#997a6e]">★</span>
-              <span className="text-[11px] tracking-[0.12em] uppercase">
-                Retours gratuits sous 14 jours
-              </span>
-              <span className="mx-6 text-[#997a6e]">★</span>
+              {announcementMessages.map((message, idx) => (
+                <span key={idx} className="flex items-center">
+                  <span className="text-[11px] tracking-[0.12em] uppercase">
+                    {message}
+                  </span>
+                  <span className="mx-6 text-[#997a6e]">★</span>
+                </span>
+              ))}
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile: message by message with fade */}
+      <div className="md:hidden bg-[#1a1a1a] text-white py-2.5 overflow-hidden">
+        <div className="relative h-4 flex items-center justify-center">
+          {announcementMessages.map((message, index) => (
+            <span
+              key={index}
+              className={`absolute inset-x-0 text-center text-[11px] tracking-[0.12em] uppercase transition-all duration-500 ${
+                index === currentMessageIndex
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}
+            >
+              {message}
+            </span>
           ))}
         </div>
       </div>

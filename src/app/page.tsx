@@ -92,12 +92,9 @@ export default async function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
                 )}
 
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-
                 {/* Category name */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-serif text-[#1a1a1a] group-hover:text-white text-[14px] md:text-[16px] tracking-[0.15em] uppercase transition-colors duration-300 bg-white/90 group-hover:bg-transparent px-4 py-2">
+                  <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase">
                     {category.name}
                   </span>
                 </div>
