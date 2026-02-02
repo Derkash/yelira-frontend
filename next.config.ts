@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'wp.yelira.fr',
         pathname: '/wp-content/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.yelira.fr',
+        pathname: '/wp-content/**',
+      },
     ],
   },
 };
