@@ -5,12 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'www.yelira.fr',
-        pathname: '/wp-content/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'yelira.fr',
+        hostname: 'wp.yelira.fr',
         pathname: '/wp-content/**',
       },
     ],

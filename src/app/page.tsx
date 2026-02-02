@@ -35,7 +35,7 @@ export default async function HomePage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://www.yelira.fr/wp-content/uploads/2024/01/hero-banner.jpg)',
+            backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/hero-banner.jpg)',
             backgroundColor: '#f5f1eb'
           }}
         />
@@ -135,7 +135,7 @@ export default async function HomePage() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(https://www.yelira.fr/wp-content/uploads/2024/01/banner-abaya.jpg)',
+            backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-abaya.jpg)',
             backgroundColor: '#d4cdc5'
           }}
         />
@@ -196,7 +196,7 @@ export default async function HomePage() {
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
             style={{
-              backgroundImage: 'url(https://www.yelira.fr/wp-content/uploads/2024/01/banner-hijab.jpg)',
+              backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-hijab.jpg)',
               backgroundColor: '#e8dfd5'
             }}
           />
@@ -217,7 +217,7 @@ export default async function HomePage() {
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
             style={{
-              backgroundImage: 'url(https://www.yelira.fr/wp-content/uploads/2024/01/banner-jilbab.jpg)',
+              backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-jilbab.jpg)',
               backgroundColor: '#d4cdc5'
             }}
           />

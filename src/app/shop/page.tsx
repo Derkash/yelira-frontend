@@ -100,7 +100,7 @@ function ShopContent() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(https://www.yelira.fr/wp-content/uploads/2024/01/shop-banner.jpg)',
+            backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/shop-banner.jpg)',
             filter: 'grayscale(20%)'
           }}
         />

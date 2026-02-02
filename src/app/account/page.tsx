@@ -23,7 +23,7 @@ export default function AccountPage() {
 
     // Redirect to WooCommerce login with return URL
     const returnUrl = encodeURIComponent(window.location.origin);
-    window.location.href = `https://www.yelira.fr/mon-compte/?redirect_to=${returnUrl}`;
+    window.location.href = `https://wp.yelira.fr/mon-compte/?redirect_to=${returnUrl}`;
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -31,7 +31,7 @@ export default function AccountPage() {
     setIsLoading(true);
 
     // Redirect to WooCommerce registration
-    window.location.href = 'https://www.yelira.fr/mon-compte/';
+    window.location.href = 'https://wp.yelira.fr/mon-compte/';
   };
 
   return (
@@ -121,7 +121,7 @@ export default function AccountPage() {
                 <span className="text-[13px] text-gray-600">Se souvenir de moi</span>
               </label>
               <a
-                href="https://www.yelira.fr/mon-compte/lost-password/"
+                href="https://wp.yelira.fr/mon-compte/lost-password/"
                 className="text-[13px] text-[#997a6e] hover:underline"
               >
                 Mot de passe oublié ?

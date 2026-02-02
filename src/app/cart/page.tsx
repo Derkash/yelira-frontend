@@ -294,7 +294,7 @@ export default function CartPage() {
 
               {/* Checkout Button */}
               <a
-                href="https://www.yelira.fr/checkout/"
+                href="https://wp.yelira.fr/checkout/"
                 className="block w-full py-4 bg-[var(--yelira-black)] text-white text-center text-sm font-semibold uppercase tracking-wider hover:bg-[var(--yelira-taupe)] transition-colors"
               >
                 Passer la commande
