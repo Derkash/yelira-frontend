@@ -64,16 +64,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories Grid - Neyssa Style */}
-      <section className="py-12 md:py-20">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="text-center mb-10 md:mb-14">
-            <h2 className="font-serif text-[24px] md:text-[32px] tracking-[0.08em] uppercase">
-              Nos Collections
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+      {/* Categories Grid */}
+      <section>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             {displayCategories.map((category) => (
               <Link
                 key={'id' in category ? category.id : category.slug}
@@ -93,15 +86,14 @@ export default async function HomePage() {
                 )}
 
                 {/* Category name */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase">
-                    {category.name}
+                <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase text-center">
+                    {category.name.replace(/&amp;/gi, '&')}
                   </span>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
       </section>
 
       {/* New Arrivals - Neyssa Style */}
