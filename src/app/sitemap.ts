@@ -21,6 +21,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Informational & legal pages
+  const infoPages: MetadataRoute.Sitemap = [
+    'livraison',
+    'retours',
+    'guide-tailles',
+    'faq',
+    'cgv',
+    'mentions-legales',
+    'confidentialite',
+    'cookies',
+  ].map((slug) => ({
+    url: `${baseUrl}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.3,
+  }));
+
   // Category pages
   let categoryPages: MetadataRoute.Sitemap = [];
   try {
@@ -59,5 +76,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continue without product pages if API fails
   }
 
-  return [...staticPages, ...categoryPages, ...seoPageEntries, ...productPages];
+  return [...staticPages, ...infoPages, ...categoryPages, ...seoPageEntries, ...productPages];
 }
