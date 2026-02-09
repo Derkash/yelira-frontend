@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 
@@ -35,17 +36,17 @@ function SearchModal({ onClose }: { onClose: () => void }) {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Rechercher un produit..."
-                  className="w-full text-lg lg:text-2xl py-2 border-b-2 border-[#1a1a1a] focus:outline-none focus:border-[#997a6e] transition-colors bg-transparent"
+                  placeholder="Recherchez un produit..."
+                  className="w-full text-lg lg:text-2xl py-2 border-b-2 border-[var(--yelira-black)] focus:outline-none focus:border-[var(--yelira-taupe)] transition-colors bg-transparent"
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
-                className="p-2 hover:text-[#997a6e] transition"
+                className="p-2 hover:text-[var(--yelira-taupe)] transition"
                 aria-label="Rechercher"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="11" cy="11" r="8" strokeWidth="1.5" />
                   <path strokeWidth="1.5" d="m21 21-4.35-4.35" />
                 </svg>
@@ -54,9 +55,9 @@ function SearchModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition"
-                aria-label="Fermer"
+                aria-label="Fermer la recherche"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -75,7 +76,7 @@ function SearchModal({ onClose }: { onClose: () => void }) {
                 <button
                   key={term}
                   onClick={() => handleQuickSearch(term)}
-                  className="px-4 py-2 bg-[#f5f1eb] text-[13px] hover:bg-[#997a6e] hover:text-white transition"
+                  className="px-4 py-2 bg-[var(--yelira-beige)] text-[13px] hover:bg-[var(--yelira-taupe)] hover:text-white transition"
                 >
                   {term}
                 </button>
@@ -96,7 +97,7 @@ function SearchModal({ onClose }: { onClose: () => void }) {
                   key={cat.slug}
                   href={`/category/${cat.slug}`}
                   onClick={onClose}
-                  className="aspect-square bg-[#f5f1eb] flex items-center justify-center text-[13px] font-medium uppercase tracking-wider hover:bg-[#997a6e] hover:text-white transition"
+                  className="aspect-square bg-[var(--yelira-beige)] flex items-center justify-center text-[13px] font-medium uppercase tracking-wider hover:bg-[var(--yelira-taupe)] hover:text-white transition"
                 >
                   {cat.name}
                 </Link>
@@ -109,7 +110,7 @@ function SearchModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// Mega-menu structure like Neyssa
+// Mega-menu structure
 const menuData = [
   {
     name: 'Soldes',
@@ -245,212 +246,111 @@ const announcementMessages = [
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
+  const [submenuOpen, setSubmenuOpen] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const { cart } = useCart();
 
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  // Measure header height for spacer
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const updateHeight = () => setHeaderHeight(header.offsetHeight);
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
+  // Shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mobile: cycle through messages one by one
+  // Lock body scroll when menu or search is open
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % announcementMessages.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
+    if (isMenuOpen || isSearchOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen, isSearchOpen]);
 
   return (
     <>
-      {/* Top Promo Banner - Neyssa style */}
-      {/* Desktop: continuous marquee */}
-      <div className="hidden md:block bg-[#1a1a1a] text-white py-2 overflow-hidden">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center mx-8">
-              {announcementMessages.map((message, idx) => (
-                <span key={idx} className="flex items-center">
-                  <span className="text-[11px] tracking-[0.12em] uppercase">
+      {/* Fixed Header - 3 lines always visible */}
+      <header
+        ref={headerRef}
+        className={`fixed top-0 left-0 right-0 z-50 transition-shadow duration-300 ${
+          isScrolled ? 'shadow-md' : ''
+        }`}
+        role="banner"
+      >
+        {/* Line 1 - Delivery Banner with continuous marquee */}
+        <div
+          className="bg-[var(--yelira-black)] text-white py-2 overflow-hidden"
+          aria-label="Informations livraison"
+        >
+          <div className="flex w-max animate-marquee">
+            {[0, 1, 2].flatMap((copy) =>
+              announcementMessages.map((message, idx) => (
+                <span key={`${copy}-${idx}`} className="shrink-0 flex items-center">
+                  <span className="whitespace-nowrap text-[11px] tracking-[0.12em] uppercase">
                     {message}
                   </span>
-                  <span className="mx-6 text-[#997a6e]">★</span>
+                  <span className="shrink-0 mx-4 lg:mx-6 text-[var(--yelira-taupe)]">★</span>
                 </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile: message by message with fade */}
-      <div className="md:hidden bg-[#1a1a1a] text-white py-2.5 overflow-hidden">
-        <div className="relative h-4 flex items-center justify-center">
-          {announcementMessages.map((message, index) => (
-            <span
-              key={index}
-              className={`absolute inset-x-0 text-center text-[11px] tracking-[0.12em] uppercase transition-all duration-500 ${
-                index === currentMessageIndex
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-4'
-              }`}
-            >
-              {message}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Header */}
-      <header
-        className={`bg-white sticky top-0 z-50 transition-shadow duration-300 ${
-          isScrolled ? 'shadow-md' : 'border-b border-gray-100'
-        }`}
-      >
-        {/* Top bar with account/language */}
-        <div className="hidden lg:block border-b border-gray-100">
-          <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-between text-[11px]">
-            <div className="flex items-center gap-4">
-              <span className="text-gray-500">Bienvenue chez Yelira</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <Link href="/account" className="text-gray-600 hover:text-[#997a6e] transition">
-                Mon compte
-              </Link>
-              <Link href="/wishlist" className="text-gray-600 hover:text-[#997a6e] transition">
-                Ma wishlist
-              </Link>
-              <div className="flex items-center gap-2 text-gray-600">
-                <span>FR</span>
-                <span className="text-gray-300">|</span>
-                <span>EUR €</span>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* Logo and Icons */}
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2"
-              aria-label="Menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            {/* Logo - Centered on mobile, left on desktop */}
-            <Link
-              href="/"
-              className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 font-serif text-2xl lg:text-3xl tracking-[0.15em] uppercase"
-            >
-              Yelira
+        {/* Line 2 - Logo (left) + Icons (right) */}
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-[var(--container-max)] mx-auto px-4 lg:px-6 flex items-center justify-between h-14 lg:h-16">
+            {/* Logo */}
+            <Link href="/" aria-label="Yelira - Accueil">
+              <Image
+                src="/images/brand/logo.svg"
+                alt="Yelira"
+                width={120}
+                height={56}
+                className="h-10 lg:h-12 w-auto"
+                priority
+              />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
-              {menuData.map((item) => (
-                <div
-                  key={item.slug}
-                  className="relative"
-                  onMouseEnter={() => setActiveMenu(item.slug)}
-                  onMouseLeave={() => setActiveMenu(null)}
-                >
-                  <Link
-                    href={item.slug === 'nouveautes' ? '/shop?orderby=date' : item.slug === 'soldes' ? '/shop?on_sale=true' : `/category/${item.slug}`}
-                    className={`px-4 py-6 text-[12px] font-medium tracking-[0.1em] uppercase transition-colors inline-flex items-center gap-1 ${
-                      item.highlight
-                        ? item.isNew
-                          ? 'text-[#997a6e]'
-                          : 'text-[#c41e3a]'
-                        : 'text-[#1a1a1a] hover:text-[#997a6e]'
-                    }`}
-                  >
-                    {item.name}
-                    {item.submenu && (
-                      <svg className="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </Link>
-
-                  {/* Mega Menu Dropdown */}
-                  {item.submenu && activeMenu === item.slug && (
-                    <div className="absolute top-full left-0 bg-white shadow-xl border-t min-w-[280px] py-6 px-6 animate-fadeIn">
-                      {/* Simple submenu (like Soldes) */}
-                      {Array.isArray(item.submenu) && !('title' in (item.submenu[0] || {})) && (
-                        <div className="space-y-2">
-                          {(item.submenu as Array<{ name: string; slug: string }>).map((subItem) => (
-                            <Link
-                              key={subItem.slug}
-                              href={`/category/${subItem.slug}`}
-                              className="block py-2 text-[13px] text-gray-700 hover:text-[#997a6e] transition"
-                            >
-                              {subItem.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Grouped submenu (like Abaya) */}
-                      {Array.isArray(item.submenu) && ('title' in (item.submenu[0] || {})) && (
-                        <div className="flex gap-10">
-                          {(item.submenu as Array<{ title: string; items: Array<{ name: string; slug: string }> }>).map((group) => (
-                            <div key={group.title}>
-                              <h4 className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-3">
-                                {group.title}
-                              </h4>
-                              <div className="space-y-2">
-                                {group.items.map((subItem) => (
-                                  <Link
-                                    key={subItem.slug}
-                                    href={`/category/${subItem.slug}`}
-                                    className="block py-1 text-[13px] text-gray-700 hover:text-[#997a6e] transition"
-                                  >
-                                    {subItem.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            {/* Icons */}
-            <div className="flex items-center gap-1">
-              {/* Search */}
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 hover:bg-gray-50 rounded-full transition"
-                aria-label="Rechercher"
+            {/* Icons: Wishlist, Account, Cart, Burger */}
+            <nav aria-label="Actions rapides" className="flex items-center gap-0.5 lg:gap-1">
+              {/* Wishlist (heart) */}
+              <Link
+                href="/wishlist"
+                className="p-2 lg:p-2.5 hover:bg-gray-50 rounded-full transition"
+                aria-label="Ma liste d'envies"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" strokeWidth="1.5" />
-                  <path d="m21 21-4.35-4.35" strokeWidth="1.5" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeWidth="1.5" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
-              </button>
+              </Link>
 
-              {/* Account - Desktop only */}
+              {/* Account */}
               <Link
                 href="/account"
-                className="hidden sm:flex p-2.5 hover:bg-gray-50 rounded-full transition"
+                className="p-2 lg:p-2.5 hover:bg-gray-50 rounded-full transition"
                 aria-label="Mon compte"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeWidth="1.5" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" strokeWidth="1.5" />
                 </svg>
@@ -459,96 +359,157 @@ export default function Header() {
               {/* Cart */}
               <Link
                 href="/cart"
-                className="p-2.5 hover:bg-gray-50 rounded-full transition relative"
-                aria-label="Panier"
+                className="p-2 lg:p-2.5 hover:bg-gray-50 rounded-full transition relative"
+                aria-label={`Panier${cart.itemCount > 0 ? ` (${cart.itemCount} article${cart.itemCount > 1 ? 's' : ''})` : ''}`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeWidth="1.5" d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                   <line x1="3" y1="6" x2="21" y2="6" strokeWidth="1.5" />
                   <path strokeWidth="1.5" d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
                 {cart.itemCount > 0 && (
-                  <span className="absolute top-0 right-0 w-5 h-5 bg-[#1a1a1a] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {cart.itemCount}
+                  <span
+                    className="absolute top-0 right-0 w-5 h-5 bg-[var(--yelira-black)] text-white text-[10px] font-bold rounded-full flex items-center justify-center"
+                    aria-hidden="true"
+                  >
+                    {cart.itemCount > 9 ? '9+' : cart.itemCount}
                   </span>
                 )}
               </Link>
-            </div>
+
+              {/* Burger Menu */}
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2 lg:p-2.5 hover:bg-gray-50 rounded-full transition"
+                aria-label="Ouvrir le menu"
+                aria-expanded={isMenuOpen}
+                aria-controls="main-menu-drawer"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Line 3 - Search Bar (full width, always visible) */}
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-[var(--container-max)] mx-auto px-4 lg:px-6 py-2">
+            <button
+              type="button"
+              onClick={() => setIsSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 bg-[var(--yelira-beige)] text-left transition-colors hover:bg-[#ede8e1] cursor-text"
+              aria-label="Ouvrir la recherche"
+            >
+              <svg
+                className="w-5 h-5 text-gray-400 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" strokeWidth="1.5" />
+                <path d="m21 21-4.35-4.35" strokeWidth="1.5" />
+              </svg>
+              <span className="text-[13px] text-gray-400 select-none">
+                Recherchez un produit
+              </span>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Drawer - Neyssa style */}
+      {/* Spacer to offset fixed header */}
+      <div style={{ height: headerHeight }} aria-hidden="true" />
+
+      {/* Menu Drawer - accessible on both mobile and desktop */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
+        <div
+          className="fixed inset-0 z-[100]"
+          id="main-menu-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu de navigation"
+        >
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setIsMenuOpen(false)}
+            aria-hidden="true"
           />
-          <div className="absolute left-0 top-0 bottom-0 w-[320px] bg-white animate-slideInLeft overflow-y-auto">
-            {/* Header */}
+
+          {/* Drawer panel */}
+          <nav className="absolute left-0 top-0 bottom-0 w-[320px] lg:w-[380px] bg-white animate-slideInLeft overflow-y-auto">
+            {/* Drawer Header */}
             <div className="sticky top-0 bg-white z-10 p-4 border-b flex items-center justify-between">
               <span className="font-serif text-xl tracking-wider">Menu</span>
               <button
                 onClick={() => setIsMenuOpen(false)}
-                className="p-2"
-                aria-label="Fermer"
+                className="p-2 hover:bg-gray-50 rounded-full transition"
+                aria-label="Fermer le menu"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Menu Items */}
-            <nav className="p-4">
+            <div className="p-4">
               {menuData.map((item) => (
                 <div key={item.slug} className="border-b border-gray-100">
                   {item.submenu ? (
                     <>
                       <button
-                        onClick={() => setMobileSubmenu(mobileSubmenu === item.slug ? null : item.slug)}
+                        onClick={() => setSubmenuOpen(submenuOpen === item.slug ? null : item.slug)}
                         className={`w-full flex items-center justify-between py-4 text-[13px] font-medium uppercase tracking-wider ${
                           item.highlight
                             ? item.isNew
-                              ? 'text-[#997a6e]'
-                              : 'text-[#c41e3a]'
+                              ? 'text-[var(--yelira-taupe)]'
+                              : 'text-[var(--yelira-red)]'
                             : ''
                         }`}
+                        aria-expanded={submenuOpen === item.slug}
                       >
                         {item.name}
                         <svg
                           className={`w-4 h-4 transition-transform ${
-                            mobileSubmenu === item.slug ? 'rotate-180' : ''
+                            submenuOpen === item.slug ? 'rotate-180' : ''
                           }`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
+                          aria-hidden="true"
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
 
-                      {mobileSubmenu === item.slug && (
+                      {submenuOpen === item.slug && (
                         <div className="pb-4 pl-4 animate-fadeIn">
                           <Link
-                            href={`/category/${item.slug}`}
-                            className="block py-2 text-[13px] text-gray-600"
+                            href={item.slug === 'soldes' ? '/shop?on_sale=true' : `/category/${item.slug}`}
+                            className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
                             onClick={() => setIsMenuOpen(false)}
                           >
                             Voir tout {item.name}
                           </Link>
+
+                          {/* Simple submenu (like Soldes) */}
                           {Array.isArray(item.submenu) && !('title' in (item.submenu[0] || {})) &&
                             (item.submenu as Array<{ name: string; slug: string }>).map((sub) => (
                               <Link
                                 key={sub.slug}
                                 href={`/category/${sub.slug}`}
-                                className="block py-2 text-[13px] text-gray-600"
+                                className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
                                 onClick={() => setIsMenuOpen(false)}
                               >
                                 {sub.name}
                               </Link>
                             ))}
+
+                          {/* Grouped submenu (like Abaya) */}
                           {Array.isArray(item.submenu) && ('title' in (item.submenu[0] || {})) &&
                             (item.submenu as Array<{ title: string; items: Array<{ name: string; slug: string }> }>).map((group) => (
                               <div key={group.title} className="mt-3">
@@ -559,7 +520,7 @@ export default function Header() {
                                   <Link
                                     key={sub.slug}
                                     href={`/category/${sub.slug}`}
-                                    className="block py-2 text-[13px] text-gray-600"
+                                    className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                   >
                                     {sub.name}
@@ -572,13 +533,17 @@ export default function Header() {
                     </>
                   ) : (
                     <Link
-                      href={`/category/${item.slug}`}
+                      href={
+                        item.slug === 'nouveautes'
+                          ? '/shop?orderby=date'
+                          : `/category/${item.slug}`
+                      }
                       className={`block py-4 text-[13px] font-medium uppercase tracking-wider ${
                         item.highlight
                           ? item.isNew
-                            ? 'text-[#997a6e]'
-                            : 'text-[#c41e3a]'
-                          : ''
+                            ? 'text-[var(--yelira-taupe)]'
+                            : 'text-[var(--yelira-red)]'
+                          : 'hover:text-[var(--yelira-taupe)] transition-colors'
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -587,56 +552,41 @@ export default function Header() {
                   )}
                 </div>
               ))}
-            </nav>
+            </div>
 
-            {/* Footer links */}
-            <div className="p-4 border-t mt-4 space-y-3">
-              <Link href="/account" className="flex items-center gap-3 py-2 text-[13px] text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Drawer footer links */}
+            <div className="p-4 border-t mt-2 space-y-3">
+              <Link
+                href="/account"
+                className="flex items-center gap-3 py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeWidth="1.5" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" strokeWidth="1.5" />
                 </svg>
                 Mon compte
               </Link>
-              <Link href="/wishlist" className="flex items-center gap-3 py-2 text-[13px] text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link
+                href="/wishlist"
+                className="flex items-center gap-3 py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeWidth="1.5" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
                 Ma wishlist
               </Link>
             </div>
-          </div>
+          </nav>
         </div>
       )}
 
-      {/* Search Modal - Full screen Neyssa style */}
+      {/* Search Modal - Full screen */}
       {isSearchOpen && (
         <SearchModal onClose={() => setIsSearchOpen(false)} />
       )}
 
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-33.33%); }
-        }
-        .animate-marquee {
-          animation: marquee 25s linear infinite;
-        }
-        @keyframes slideInLeft {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-slideInLeft {
-          animation: slideInLeft 0.3s ease forwards;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease forwards;
-        }
-      `}</style>
     </>
   );
 }

@@ -3,19 +3,46 @@ import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import MobileNav from '@/components/layout/MobileNav';
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
-  title: 'Yelira - Mode Modeste pour Femmes Musulmanes',
-  description: 'Boutique en ligne de mode modeste pour femmes musulmanes. Abayas, Hijabs, Jilbabs, Robes et plus. Livraison gratuite dès 69€.',
-  keywords: 'mode modeste, abaya, hijab, jilbab, khimar, burkini, femme musulmane, vêtements islamiques',
+  metadataBase: new URL('https://www.yelira.fr'),
+  title: {
+    default: 'Yelira - Mode Modeste pour Femmes Musulmanes | Abaya, Hijab, Jilbab',
+    template: '%s | Yelira',
+  },
+  description: 'Boutique en ligne de mode modeste pour femmes musulmanes. Abayas, Hijabs, Jilbabs, Robes et plus. Livraison gratuite dès 69€. Paiement sécurisé.',
+  keywords: 'mode modeste, abaya, hijab, jilbab, khimar, burkini, femme musulmane, vêtements islamiques, abaya dubai, abaya pas cher, hijab jersey',
   openGraph: {
     title: 'Yelira - Mode Modeste Élégante',
-    description: 'Découvrez notre collection de vêtements alliant pudeur, modernité et raffinement.',
+    description: 'Découvrez notre collection de vêtements alliant pudeur, modernité et raffinement. Abayas, Hijabs, Jilbabs et plus.',
     url: 'https://www.yelira.fr',
     siteName: 'Yelira',
     locale: 'fr_FR',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yelira - Mode Modeste Élégante',
+    description: 'Découvrez notre collection de vêtements alliant pudeur, modernité et raffinement.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://www.yelira.fr',
+  },
+  verification: {
+    // Add Google Search Console verification when available
+    // google: 'your-verification-code',
   },
 };
 
@@ -29,13 +56,28 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#1a1a1a" />
+        <OrganizationJsonLd
+          name="Yelira"
+          url="https://www.yelira.fr"
+          description="Boutique en ligne de mode modeste pour femmes musulmanes. Abayas, Hijabs, Jilbabs, Robes et plus."
+          sameAs={[
+            'https://instagram.com/yelira_boutique',
+            'https://facebook.com/yelira',
+            'https://tiktok.com/@yelira_boutique',
+          ]}
+        />
+        <WebSiteJsonLd
+          name="Yelira"
+          url="https://www.yelira.fr"
+          description="Boutique en ligne de mode modeste pour femmes musulmanes"
+          searchUrl="https://www.yelira.fr/search?q={search_term_string}"
+        />
       </head>
       <body className="antialiased">
         <CartProvider>
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />
-          <MobileNav />
         </CartProvider>
       </body>
     </html>
