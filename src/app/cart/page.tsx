@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/woocommerce';
@@ -120,7 +119,8 @@ export default function CartPage() {
                   ? parseFloat(item.variation.price)
                   : parseFloat(item.product.price);
                 const itemTotal = price * item.quantity;
-                const image = item.variation?.image || item.product.images[0];
+                const rawImage = item.variation?.image || item.product.images?.[0];
+                const imageSrc = rawImage?.src?.replace(/^http:\/\//, 'https://') || null;
 
                 return (
                   <div
@@ -131,15 +131,21 @@ export default function CartPage() {
                     <div className="col-span-12 md:col-span-6 flex gap-4">
                       <Link
                         href={`/product/${item.product.slug}`}
-                        className="relative w-20 h-24 flex-shrink-0 bg-gray-100 overflow-hidden"
+                        style={{ position: 'relative', width: '80px', height: '96px', flexShrink: 0, backgroundColor: '#f3f4f6', overflow: 'hidden', display: 'block' }}
                       >
-                        {image && (
-                          <Image
-                            src={image.src}
-                            alt={image.alt || item.product.name}
-                            fill
-                            className="object-cover"
+                        {imageSrc ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={imageSrc}
+                            alt={rawImage?.alt || item.product.name}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                           />
+                        ) : (
+                          <span style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d1d5db' }}>
+                            <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </span>
                         )}
                       </Link>
                       <div className="flex flex-col justify-center">

@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductDetails from '@/components/product/ProductDetails';
 import ProductCard from '@/components/product/ProductCard';
+import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
+import { getSeoContent } from '@/data/seo-content';
+import SeoBottomSection from '@/components/seo/SeoBottomSection';
 import {
   getProduct,
   getProductVariations,
@@ -45,12 +48,18 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         description,
         images: product.images?.[0]?.src ? [product.images[0].src] : [],
         type: 'website',
+        url: `https://www.yelira.fr/product/${slug}`,
+        siteName: 'Yelira',
+        locale: 'fr_FR',
       },
       twitter: {
         card: 'summary_large_image',
         title: product.name,
         description,
         images: product.images?.[0]?.src ? [product.images[0].src] : [],
+      },
+      alternates: {
+        canonical: `https://www.yelira.fr/product/${slug}`,
       },
     };
   } catch {
@@ -84,8 +93,43 @@ export default async function ProductPage({ params }: ProductPageProps) {
       : Promise.resolve([]),
   ]);
 
+  const baseUrl = 'https://www.yelira.fr';
+
+  // Get SEO content based on product's main category
+  const mainCategorySlug = product.categories?.[0]?.slug || 'abayas';
+  const mainCategoryName = product.categories?.[0]?.name || 'Abayas';
+  const seoContentData = getSeoContent(mainCategorySlug, mainCategoryName, 'category');
+
+  // Build breadcrumb items for JSON-LD
+  const breadcrumbItems = [
+    { name: 'Accueil', url: baseUrl },
+    { name: 'Boutique', url: `${baseUrl}/shop` },
+  ];
+  if (product.categories?.[0]) {
+    breadcrumbItems.push({
+      name: product.categories[0].name,
+      url: `${baseUrl}/category/${product.categories[0].slug}`,
+    });
+  }
+  breadcrumbItems.push({
+    name: product.name,
+    url: `${baseUrl}/product/${slug}`,
+  });
+
   return (
     <div className="min-h-screen bg-[var(--yelira-cream)]">
+      {/* JSON-LD Structured Data */}
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <ProductJsonLd
+        name={product.name}
+        description={product.short_description || product.description || product.name}
+        image={product.images?.map((img) => img.src) || []}
+        url={`${baseUrl}/product/${slug}`}
+        price={product.price}
+        availability={product.stock_status === 'instock' ? 'InStock' : 'OutOfStock'}
+        sku={product.sku || undefined}
+      />
+
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -132,6 +176,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         )}
       </div>
+
+      {/* SEO Bottom Section */}
+      <SeoBottomSection content={seoContentData} />
     </div>
   );
 }

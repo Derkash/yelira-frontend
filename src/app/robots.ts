@@ -1,0 +1,14 @@
+import { MetadataRoute } from 'next';
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api/', '/cart', '/account', '/checkout'],
+      },
+    ],
+    sitemap: 'https://www.yelira.fr/sitemap.xml',
+  };
+}
