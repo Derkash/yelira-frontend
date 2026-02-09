@@ -41,8 +41,7 @@ export const metadata: Metadata = {
     canonical: 'https://www.yelira.fr',
   },
   verification: {
-    // Add Google Search Console verification when available
-    // google: 'your-verification-code',
+    google: 'Dy0nBS-UoqhSJL97RIyxJnPNUGoG-dIlAvt1c-2XLYY',
   },
 };
 
