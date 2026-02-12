@@ -12,7 +12,7 @@ interface CollapsibleIntroProps {
 export default function CollapsibleIntro({
   title,
   html,
-  maxHeight = 120,
+  maxHeight = 48,
   seoSectionId = 'seo-guide',
 }: CollapsibleIntroProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,7 +26,7 @@ export default function CollapsibleIntro({
   }, [html, maxHeight]);
 
   return (
-    <div className="py-8 md:py-10 border-b border-gray-100">
+    <div className="py-3 md:py-10 border-b border-gray-100">
       <div className="max-w-[900px]">
         <h2 className="font-serif text-[18px] md:text-[22px] tracking-[0.03em] mb-4 text-[#1a1a1a]">
           {title}

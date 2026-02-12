@@ -88,7 +88,7 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
     <>
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
         {/* Image Gallery */}
-        <div>
+        <div className="min-w-0">
           {/* Mobile: Horizontal scroll carousel */}
           <div
             ref={galleryRef}

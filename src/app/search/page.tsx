@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { searchProducts } from '@/lib/woocommerce';
 import ProductCard from '@/components/product/ProductCard';
-import SearchForm from './SearchForm';
-
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
 }
@@ -16,19 +14,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Search Header */}
-      <div className="bg-[#faf8f5] py-12 md:py-16">
-        <div className="max-w-[800px] mx-auto px-4">
-          <h1 className="font-serif text-[28px] md:text-[36px] text-center tracking-[0.05em] mb-8">
-            Rechercher
-          </h1>
-
-          <SearchForm initialQuery={query} />
-        </div>
-      </div>
-
       {/* Results */}
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-4 pb-12 md:py-12">
         {query ? (
           <>
             <div className="mb-8">

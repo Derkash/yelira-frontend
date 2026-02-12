@@ -123,53 +123,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           <FAQJsonLd questions={seoContentData.faq} />
         )}
 
-        {/* Hero Banner */}
-        <div className="relative h-[200px] md:h-[320px] bg-[#1a1a1a] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10" />
-          {category.image ? (
-            <Image
-              src={category.image.src}
-              alt={category.name}
-              fill
-              className="object-cover opacity-70"
-              priority
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#997a6e] to-[#1a1a1a]" />
-          )}
-          <div className="relative z-20 h-full flex flex-col justify-center px-4 md:px-6 lg:px-8 max-w-[1400px] mx-auto">
-            <nav className="text-[11px] text-white/60 mb-4 tracking-[0.1em] uppercase">
-              <Link href="/" className="hover:text-white transition-colors">
-                Accueil
-              </Link>
-              <span className="mx-2">/</span>
-              <Link href="/shop" className="hover:text-white transition-colors">
-                Boutique
-              </Link>
-              {parentCategory && (
-                <>
-                  <span className="mx-2">/</span>
-                  <Link href={`/category/${parentCategory.slug}`} className="hover:text-white transition-colors">
-                    {parentCategory.name}
-                  </Link>
-                </>
-              )}
-              <span className="mx-2">/</span>
-              <span className="text-white">{category.name}</span>
-            </nav>
-            <h1 className="font-serif text-white text-[28px] md:text-[42px] tracking-[0.05em] uppercase">
-              {category.name}
-            </h1>
-            {category.description && (
-              <p
-                className="text-white/70 mt-2 text-[14px] max-w-xl"
-                dangerouslySetInnerHTML={{ __html: category.description }}
-              />
-            )}
-            <p className="text-white/50 mt-2 text-[13px]">
-              {category.count} produit{category.count > 1 ? 's' : ''}
-            </p>
-          </div>
+        {/* Category Title */}
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-3 md:pt-10">
+          <h1 className="font-serif text-[28px] md:text-[42px] tracking-[0.05em] uppercase text-[#1a1a1a]">
+            {category.name}
+          </h1>
         </div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
