@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { getCategories, getCategoryProductImages } from '@/lib/woocommerce';
+import type { Category } from '@/types/woocommerce';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 
@@ -110,133 +112,6 @@ function SearchModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// Mega-menu structure
-const menuData = [
-  {
-    name: 'Soldes',
-    slug: 'soldes',
-    highlight: true,
-    submenu: [
-      { name: 'Tous les soldes', slug: 'soldes' },
-      { name: 'Abayas en solde', slug: 'soldes-abayas' },
-      { name: 'Hijabs en solde', slug: 'soldes-hijabs' },
-      { name: 'Jilbabs en solde', slug: 'soldes-jilbabs' },
-    ],
-  },
-  {
-    name: 'Nouveautés',
-    slug: 'nouveautes',
-    highlight: true,
-    isNew: true,
-  },
-  {
-    name: 'Abaya',
-    slug: 'abayas',
-    submenu: [
-      {
-        title: 'Par type',
-        items: [
-          { name: 'Abaya Robe', slug: 'abaya-robe' },
-          { name: 'Abaya Papillon', slug: 'abaya-papillon' },
-          { name: 'Abaya Kimono', slug: 'abaya-kimono' },
-          { name: 'Abaya Ouverte', slug: 'abaya-ouverte' },
-        ],
-      },
-      {
-        title: 'Par style',
-        items: [
-          { name: 'Abaya Dubai', slug: 'abaya-dubai' },
-          { name: 'Abaya Brodée', slug: 'abaya-brodee' },
-          { name: 'Abaya Satin', slug: 'abaya-satin' },
-          { name: 'Abaya Simple', slug: 'abaya-simple' },
-        ],
-      },
-      {
-        title: 'Par couleur',
-        items: [
-          { name: 'Abaya Noire', slug: 'abaya-noire' },
-          { name: 'Abaya Beige', slug: 'abaya-beige' },
-          { name: 'Abaya Blanche', slug: 'abaya-blanche' },
-          { name: 'Abaya Colorée', slug: 'abaya-coloree' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Hijab',
-    slug: 'hijabs',
-    submenu: [
-      {
-        title: 'Par matière',
-        items: [
-          { name: 'Hijab Jersey', slug: 'hijab-jersey' },
-          { name: 'Hijab Soie de Médine', slug: 'hijab-soie-medine' },
-          { name: 'Hijab Mousseline', slug: 'hijab-mousseline' },
-          { name: 'Hijab Satin', slug: 'hijab-satin' },
-        ],
-      },
-      {
-        title: 'Par style',
-        items: [
-          { name: 'Hijab à enfiler', slug: 'hijab-enfiler' },
-          { name: 'Hijab Carré', slug: 'hijab-carre' },
-          { name: 'Sous-hijab', slug: 'sous-hijab' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Jilbab',
-    slug: 'jilbabs',
-    submenu: [
-      {
-        title: 'Par type',
-        items: [
-          { name: 'Jilbab 1 pièce', slug: 'jilbab-1-piece' },
-          { name: 'Jilbab 2 pièces', slug: 'jilbab-2-pieces' },
-          { name: 'Jilbab Saoudien', slug: 'jilbab-saoudien' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Khimar',
-    slug: 'khimar',
-  },
-  {
-    name: 'Robe',
-    slug: 'robes',
-    submenu: [
-      {
-        title: 'Par occasion',
-        items: [
-          { name: 'Robe de prière', slug: 'robe-priere' },
-          { name: 'Robe de soirée', slug: 'robe-soiree' },
-          { name: 'Robe casual', slug: 'robe-casual' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Burkini',
-    slug: 'burkini',
-  },
-  {
-    name: 'Homme',
-    slug: 'homme',
-    submenu: [
-      {
-        title: 'Vêtements',
-        items: [
-          { name: 'Qamis', slug: 'qamis' },
-          { name: 'Qamis Marocain', slug: 'qamis-marocain' },
-          { name: 'Ensemble', slug: 'ensemble-homme' },
-        ],
-      },
-    ],
-  },
-];
-
 const announcementMessages = [
   'Frais de port offert dès 69€ en point relais France et Belgique !',
   'Livraison 24/48H en point relais',
@@ -246,9 +121,47 @@ const announcementMessages = [
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [wpCategories, setWpCategories] = useState<Category[]>([]);
+  const [activeTabId, setActiveTabId] = useState<number | null>(null);
+  const [productImages, setProductImages] = useState<Record<number, string>>({});
   const { cart } = useCart();
+
+  // Slugs des catégories parentes qui servent d'onglets dans le menu
+  const menuTabSlugs = ['femme', 'homme', 'enfant'];
+
+  // Fetch all categories + first product images from WooCommerce
+  const fetchCategories = useCallback(async () => {
+    try {
+      const cats = await getCategories({ per_page: 100 });
+      setWpCategories(cats);
+      // Set first tab as active
+      const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
+      if (firstTab) setActiveTabId(firstTab.id);
+      // Fetch first product image for each non-parent category
+      const childCats = cats.filter((c) => c.parent !== 0);
+      const images = await getCategoryProductImages(childCats.map((c) => c.id));
+      setProductImages(images);
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isMenuOpen && wpCategories.length === 0) {
+      fetchCategories();
+    }
+  }, [isMenuOpen, wpCategories.length, fetchCategories]);
+
+  // Derive tabs and subcategories from WP data
+  const menuTabs = wpCategories
+    .filter((c) => menuTabSlugs.includes(c.slug) && c.parent === 0)
+    .sort((a, b) => menuTabSlugs.indexOf(a.slug) - menuTabSlugs.indexOf(b.slug));
+
+  const activeSubcategories = wpCategories.filter(
+    (c) => c.parent === activeTabId
+  );
 
   const headerRef = useRef<HTMLElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -423,7 +336,7 @@ export default function Header() {
       {/* Spacer to offset fixed header */}
       <div style={{ height: headerHeight }} aria-hidden="true" />
 
-      {/* Menu Drawer - accessible on both mobile and desktop */}
+      {/* Menu Drawer - Full screen, slide from right */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 z-[100]"
@@ -432,130 +345,82 @@ export default function Header() {
           aria-modal="true"
           aria-label="Menu de navigation"
         >
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setIsMenuOpen(false)}
-            aria-hidden="true"
-          />
+          <nav className="absolute inset-0 bg-white animate-slideInRight flex flex-col">
+            {/* Header sticky : close + tabs */}
+            <div className="sticky top-0 bg-white z-10 border-b">
+              {/* Close button */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="font-serif text-xl tracking-wider">Menu</span>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 hover:bg-gray-50 rounded-full transition"
+                  aria-label="Fermer le menu"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-          {/* Drawer panel */}
-          <nav className="absolute left-0 top-0 bottom-0 w-[320px] lg:w-[380px] bg-white animate-slideInLeft overflow-y-auto">
-            {/* Drawer Header */}
-            <div className="sticky top-0 bg-white z-10 p-4 border-b flex items-center justify-between">
-              <span className="font-serif text-xl tracking-wider">Menu</span>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 hover:bg-gray-50 rounded-full transition"
-                aria-label="Fermer le menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Menu Items */}
-            <div className="p-4">
-              {menuData.map((item) => (
-                <div key={item.slug} className="border-b border-gray-100">
-                  {item.submenu ? (
-                    <>
-                      <button
-                        onClick={() => setSubmenuOpen(submenuOpen === item.slug ? null : item.slug)}
-                        className={`w-full flex items-center justify-between py-4 text-[13px] font-medium uppercase tracking-wider ${
-                          item.highlight
-                            ? item.isNew
-                              ? 'text-[var(--yelira-taupe)]'
-                              : 'text-[var(--yelira-red)]'
-                            : ''
-                        }`}
-                        aria-expanded={submenuOpen === item.slug}
-                      >
-                        {item.name}
-                        <svg
-                          className={`w-4 h-4 transition-transform ${
-                            submenuOpen === item.slug ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      {submenuOpen === item.slug && (
-                        <div className="pb-4 pl-4 animate-fadeIn">
-                          <Link
-                            href={item.slug === 'soldes' ? '/shop?on_sale=true' : `/category/${item.slug}`}
-                            className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            Voir tout {item.name}
-                          </Link>
-
-                          {/* Simple submenu (like Soldes) */}
-                          {Array.isArray(item.submenu) && !('title' in (item.submenu[0] || {})) &&
-                            (item.submenu as Array<{ name: string; slug: string }>).map((sub) => (
-                              <Link
-                                key={sub.slug}
-                                href={`/category/${sub.slug}`}
-                                className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
-                                onClick={() => setIsMenuOpen(false)}
-                              >
-                                {sub.name}
-                              </Link>
-                            ))}
-
-                          {/* Grouped submenu (like Abaya) */}
-                          {Array.isArray(item.submenu) && ('title' in (item.submenu[0] || {})) &&
-                            (item.submenu as Array<{ title: string; items: Array<{ name: string; slug: string }> }>).map((group) => (
-                              <div key={group.title} className="mt-3">
-                                <span className="text-[10px] font-bold tracking-wider uppercase text-gray-400">
-                                  {group.title}
-                                </span>
-                                {group.items.map((sub) => (
-                                  <Link
-                                    key={sub.slug}
-                                    href={`/category/${sub.slug}`}
-                                    className="block py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <Link
-                      href={
-                        item.slug === 'nouveautes'
-                          ? '/shop?orderby=date'
-                          : `/category/${item.slug}`
-                      }
-                      className={`block py-4 text-[13px] font-medium uppercase tracking-wider ${
-                        item.highlight
-                          ? item.isNew
-                            ? 'text-[var(--yelira-taupe)]'
-                            : 'text-[var(--yelira-red)]'
-                          : 'hover:text-[var(--yelira-taupe)] transition-colors'
+              {/* Tabs dynamiques depuis WooCommerce */}
+              {menuTabs.length > 0 && (
+                <div className="flex border-t border-gray-100">
+                  {menuTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTabId(tab.id)}
+                      className={`flex-1 py-3 text-[13px] font-bold tracking-[0.12em] uppercase transition-colors ${
+                        activeTabId === tab.id
+                          ? 'text-[var(--yelira-black)] border-b-2 border-[var(--yelira-black)]'
+                          : 'text-gray-400 hover:text-gray-600'
                       }`}
-                      onClick={() => setIsMenuOpen(false)}
                     >
-                      {item.name}
-                    </Link>
-                  )}
+                      {tab.name}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
 
-            {/* Drawer footer links */}
-            <div className="p-4 border-t mt-2 space-y-3">
+            {/* Subcategories grid — dynamique */}
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              {activeSubcategories.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {activeSubcategories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/category/${cat.slug}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="relative w-16 h-16 flex-shrink-0 bg-[var(--yelira-beige)] overflow-hidden rounded">
+                        {(productImages[cat.id] || cat.image?.src) ? (
+                          <Image
+                            src={productImages[cat.id] || cat.image!.src}
+                            alt={cat.name}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[var(--yelira-beige)]" />
+                        )}
+                      </div>
+                      <span className="text-[13px] font-medium text-[var(--yelira-black)]">
+                        {cat.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-400 text-sm py-12">
+                  Bientôt disponible
+                </p>
+              )}
+            </div>
+
+            {/* Footer links */}
+            <div className="border-t px-4 py-4 space-y-3">
               <Link
                 href="/account"
                 className="flex items-center gap-3 py-2 text-[13px] text-gray-600 hover:text-[var(--yelira-taupe)] transition-colors"

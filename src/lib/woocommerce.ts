@@ -1,9 +1,9 @@
 import { Product, Category, ProductsResponse, Variation } from '@/types/woocommerce';
 
 // WooCommerce API Configuration
-const WC_URL = 'https://wp.yelira.fr/wp-json/wc/v3';
-const WC_KEY = 'ck_fda27c64ff65524550b3e0e6c59c1e3f0a7580a3';
-const WC_SECRET = 'cs_cb25ef00fb0afb0826ce8ea0258b70f86ef12f6b';
+const WC_URL = process.env.WC_URL || 'https://wp.yelira.fr/wp-json/wc/v3';
+const WC_KEY = process.env.WC_KEY || 'ck_fda27c64ff65524550b3e0e6c59c1e3f0a7580a3';
+const WC_SECRET = process.env.WC_SECRET || 'cs_cb25ef00fb0afb0826ce8ea0258b70f86ef12f6b';
 
 // Base64 encode credentials
 const credentials = Buffer.from(`${WC_KEY}:${WC_SECRET}`).toString('base64');
@@ -169,4 +169,36 @@ export function getProductImage(product: Product, index: number = 0): string {
     return product.images[index].src;
   }
   return '/placeholder-product.jpg';
+}
+
+/**
+ * Returns the first product image for a category.
+ * Falls back to null if no products or no images.
+ */
+export async function getCategoryProductImage(categoryId: number): Promise<string | null> {
+  try {
+    const products = await getProducts({ category: categoryId, per_page: 1 });
+    return products[0]?.images?.[0]?.src || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Enriches an array of categories with the first product image.
+ * Uses parallel fetching for performance.
+ * Returns a map: categoryId → imageUrl
+ */
+export async function getCategoryProductImages(categoryIds: number[]): Promise<Record<number, string>> {
+  const results = await Promise.all(
+    categoryIds.map(async (id) => {
+      const src = await getCategoryProductImage(id);
+      return [id, src] as const;
+    })
+  );
+  const map: Record<number, string> = {};
+  for (const [id, src] of results) {
+    if (src) map[id] = src;
+  }
+  return map;
 }

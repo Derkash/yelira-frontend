@@ -145,6 +145,15 @@ body {
   animation: slideInLeft 0.3s ease forwards;
 }
 
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease forwards;
+}
+
 @keyframes fadeInSimple {
   from { opacity: 0; }
   to { opacity: 1; }

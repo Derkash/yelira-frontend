@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getNewProducts, getOnSaleProducts, getMainCategories, getProducts } from '@/lib/woocommerce';
+import { getNewProducts, getOnSaleProducts, getMainCategories, getProducts, getCategoryProductImages } from '@/lib/woocommerce';
 import ProductCard from '@/components/product/ProductCard';
 
 // Static categories for display (backup if API doesn't return images)
@@ -26,6 +26,15 @@ export default async function HomePage() {
   const displayCategories = categories.length > 0
     ? categories.filter((cat) => cat.count > 0).slice(0, 6)
     : staticCategories;
+
+  // Fetch product images for categories (first product's image)
+  const categoryProductImages = categories.length > 0
+    ? await getCategoryProductImages(
+        displayCategories
+          .filter((c): c is typeof c & { id: number } => 'id' in c)
+          .map((c) => c.id)
+      )
+    : {};
 
   return (
     <div className="bg-white">
@@ -73,17 +82,22 @@ export default async function HomePage() {
                 href={`/category/${category.slug}`}
                 className="group relative aspect-[3/4] bg-[#f5f1eb] overflow-hidden"
               >
-                {'image' in category && category.image && typeof category.image === 'object' && 'src' in category.image ? (
-                  <Image
-                    src={category.image.src}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
-                )}
+                {(() => {
+                  const productImg = 'id' in category ? categoryProductImages[category.id as number] : undefined;
+                  const catImg = 'image' in category && category.image && typeof category.image === 'object' && 'src' in category.image ? category.image.src : undefined;
+                  const imgSrc = productImg || catImg;
+                  return imgSrc ? (
+                    <Image
+                      src={imgSrc}
+                      alt={category.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
+                  );
+                })()}
 
                 {/* Category name */}
                 <div className="absolute inset-0 flex items-center justify-center p-4">

@@ -299,12 +299,12 @@ export default function CartPage() {
               </div>
 
               {/* Checkout Button */}
-              <a
-                href="https://wp.yelira.fr/checkout/"
+              <Link
+                href="/checkout"
                 className="block w-full py-4 bg-[var(--yelira-black)] text-white text-center text-sm font-semibold uppercase tracking-wider hover:bg-[var(--yelira-taupe)] transition-colors"
               >
                 Passer la commande
-              </a>
+              </Link>
 
               {/* Trust Badges */}
               <div className="mt-6 pt-6 border-t">

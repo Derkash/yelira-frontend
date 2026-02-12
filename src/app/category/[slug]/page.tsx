@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/product/ProductCard';
-import { getProducts, getCategory, getCategories } from '@/lib/woocommerce';
+import { getProducts, getCategory, getCategories, getCategoryProductImages } from '@/lib/woocommerce';
 import { getCategoryDescription } from '@/data/category-descriptions';
 import { getSeoContent } from '@/data/seo-content';
 import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from '@/components/seo/JsonLd';
@@ -88,6 +88,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       (cat) => cat.parent === category.id && cat.count > 0
     );
 
+    // Fetch product images for subcategories
+    const subcatProductImages = subcategories.length > 0
+      ? await getCategoryProductImages(subcategories.map((c) => c.id))
+      : {};
+
     // Get category description and SEO content
     const catDesc = getCategoryDescription(slug);
     const seoContentData = getSeoContent(slug, category.name, 'category');
@@ -152,9 +157,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                     href={`/category/${subcat.slug}`}
                     className="group relative aspect-[4/3] bg-[#f5f1eb] overflow-hidden"
                   >
-                    {subcat.image ? (
+                    {(subcatProductImages[subcat.id] || subcat.image) ? (
                       <Image
-                        src={subcat.image.src}
+                        src={subcatProductImages[subcat.id] || subcat.image!.src}
                         alt={subcat.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
