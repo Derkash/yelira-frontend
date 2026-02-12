@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { formatPrice, calculateDiscount } from '@/lib/woocommerce';
@@ -15,8 +15,39 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
   const { addToCart } = useCart();
 
   // UI State
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const galleryRef = useRef<HTMLDivElement>(null);
+
+  // Track active image in mobile carousel via IntersectionObserver
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery || !product.images?.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute('data-index'));
+            if (!isNaN(index)) setActiveImageIndex(index);
+          }
+        });
+      },
+      { root: gallery, threshold: 0.6 }
+    );
+
+    const items = gallery.querySelectorAll('[data-index]');
+    items.forEach((item) => observer.observe(item));
+
+    return () => observer.disconnect();
+  }, [product.images]);
+
+  const scrollToImage = useCallback((index: number) => {
+    const gallery = galleryRef.current;
+    if (!gallery) return;
+    const target = gallery.querySelector(`[data-index="${index}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, []);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const [selectedVariation, setSelectedVariation] = useState<Variation | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'details' | 'shipping'>('description');
@@ -57,74 +88,80 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
     <>
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
         {/* Image Gallery */}
-        <div className="space-y-4">
-          {/* Main Image */}
-          <div className="relative aspect-[3/4] bg-white overflow-hidden group">
-            {product.images && product.images[selectedImage] && (
-              <Image
-                src={product.images[selectedImage].src}
-                alt={product.images[selectedImage].alt || product.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            )}
-
-            {/* Sale Badge */}
-            {isOnSale && (
-              <div className="absolute top-4 left-4 bg-[var(--yelira-red)] text-white text-xs font-semibold px-3 py-1.5 uppercase tracking-wider">
-                -{calculateDiscount(regularPrice, currentPrice)}%
+        <div>
+          {/* Mobile: Horizontal scroll carousel */}
+          <div
+            ref={galleryRef}
+            className="lg:hidden flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {product.images?.map((image, index) => (
+              <div
+                key={image.id}
+                data-index={index}
+                className="relative aspect-[3/4] flex-shrink-0 snap-center bg-white overflow-hidden"
+                style={{ width: 'min(28rem, 75vw)' }}
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt || `${product.name} - ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                  sizes="75vw"
+                />
+                {/* Sale Badge on first image */}
+                {index === 0 && isOnSale && (
+                  <div className="absolute top-4 left-4 bg-[var(--yelira-red)] text-white text-xs font-semibold px-3 py-1.5 uppercase tracking-wider">
+                    -{calculateDiscount(regularPrice, currentPrice)}%
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Navigation Arrows */}
-            {product.images && product.images.length > 1 && (
-              <>
-                <button
-                  onClick={() => setSelectedImage((prev) => (prev > 0 ? prev - 1 : product.images.length - 1))}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setSelectedImage((prev) => (prev < product.images.length - 1 ? prev + 1 : 0))}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </>
-            )}
+            ))}
           </div>
 
-          {/* Thumbnails */}
+          {/* Mobile: Dot indicators */}
           {product.images && product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {product.images.map((image, index) => (
+            <div className="lg:hidden flex justify-center gap-1.5 mt-3">
+              {product.images.map((_, index) => (
                 <button
-                  key={image.id}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative w-20 h-24 flex-shrink-0 bg-white overflow-hidden transition-all ${
-                    selectedImage === index
-                      ? 'ring-2 ring-[var(--yelira-black)]'
-                      : 'opacity-60 hover:opacity-100'
+                  key={index}
+                  onClick={() => scrollToImage(index)}
+                  className={`rounded-full transition-all duration-300 ${
+                    activeImageIndex === index
+                      ? 'w-6 h-1.5 bg-[var(--yelira-black)]'
+                      : 'w-1.5 h-1.5 bg-gray-300'
                   }`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt || `${product.name} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </button>
+                  aria-label={`Image ${index + 1}`}
+                />
               ))}
             </div>
           )}
+
+          {/* Desktop: 2-column grid */}
+          <div className="hidden lg:grid grid-cols-2 gap-1">
+            {product.images?.map((image, index) => (
+              <div
+                key={image.id}
+                className="relative aspect-[3/4] bg-white overflow-hidden group"
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt || `${product.name} - ${index + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  priority={index < 2}
+                  sizes="25vw"
+                />
+                {/* Sale Badge on first image */}
+                {index === 0 && isOnSale && (
+                  <div className="absolute top-4 left-4 bg-[var(--yelira-red)] text-white text-xs font-semibold px-3 py-1.5 uppercase tracking-wider">
+                    -{calculateDiscount(regularPrice, currentPrice)}%
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Product Info */}
