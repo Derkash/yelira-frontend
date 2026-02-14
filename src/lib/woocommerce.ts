@@ -117,19 +117,21 @@ export async function getCategories(params: {
     searchParams.append('hide_empty', String(params.hide_empty));
   }
 
-  return wcFetch<Category[]>(`/products/categories?${searchParams.toString()}`);
+  const cats = await wcFetch<Category[]>(`/products/categories?${searchParams.toString()}`);
+  return cats.map(decodeCategory);
 }
 
 export async function getCategory(idOrSlug: string | number): Promise<Category> {
   if (typeof idOrSlug === 'number' || !isNaN(Number(idOrSlug))) {
-    return wcFetch<Category>(`/products/categories/${idOrSlug}`);
+    const cat = await wcFetch<Category>(`/products/categories/${idOrSlug}`);
+    return decodeCategory(cat);
   }
 
   const categories = await wcFetch<Category[]>(`/products/categories?slug=${idOrSlug}`);
   if (categories.length === 0) {
     throw new Error('Category not found');
   }
-  return categories[0];
+  return decodeCategory(categories[0]);
 }
 
 export async function getMainCategories(): Promise<Category[]> {
@@ -148,6 +150,19 @@ export async function searchProducts(query: string, limit: number = 20): Promise
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+}
+
+function decodeCategory(cat: Category): Category {
+  return { ...cat, name: decodeHtmlEntities(cat.name) };
+}
 
 export function formatPrice(price: string | number): string {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price;

@@ -138,7 +138,7 @@ export default function HomeContent({
                   )}
                   <div className="absolute inset-0 flex items-center justify-center p-4">
                     <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase text-center">
-                      {category.name.replace(/&amp;/gi, '&')}
+                      {category.name}
                     </span>
                   </div>
                 </Link>
