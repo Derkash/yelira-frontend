@@ -141,36 +141,49 @@ export default function Header() {
   // Slugs des catégories parentes qui servent d'onglets dans le menu
   const menuTabSlugs = ['femme', 'homme', 'enfant'];
 
-  // Fetch all categories + first product images from WooCommerce
-  const fetchCategories = useCallback(async () => {
-    setIsCategoriesLoading(true);
-    try {
-      const cats = await getCategories({ per_page: 100 });
-      setWpCategories(cats);
-      // Set "Femme" as default active tab
-      const femmeTab = cats.find((c) => c.slug === 'femme' && c.parent === 0);
-      if (femmeTab) {
-        setActiveTabId(femmeTab.id);
-      } else {
-        const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
-        if (firstTab) setActiveTabId(firstTab.id);
+  // Fetch category list only on mount (single fast API call)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchCats() {
+      try {
+        const cats = await getCategories({ per_page: 100 });
+        if (cancelled) return;
+        setWpCategories(cats);
+        const femmeTab = cats.find((c) => c.slug === 'femme' && c.parent === 0);
+        if (femmeTab) {
+          setActiveTabId(femmeTab.id);
+        } else {
+          const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
+          if (firstTab) setActiveTabId(firstTab.id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
       }
-      // Fetch first product image for each non-parent category
-      const childCats = cats.filter((c) => c.parent !== 0);
-      const images = await getCategoryProductImages(childCats.map((c) => c.id));
-      setProductImages(images);
-    } catch (err) {
-      console.error('Failed to fetch categories:', err);
-    } finally {
-      setIsCategoriesLoading(false);
     }
+    fetchCats();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prefetch categories on mount so data is ready when menu opens
+  // Lazy-load product images only when menu opens, per active tab
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    if (!isMenuOpen || !activeTabId || wpCategories.length === 0) return;
+    const subcats = wpCategories.filter((c) => c.parent === activeTabId);
+    const missing = subcats.filter((c) => !productImages[c.id] && !c.image?.src);
+    if (missing.length === 0) {
+      setIsCategoriesLoading(false);
+      return;
+    }
+    setIsCategoriesLoading(true);
+    let cancelled = false;
+    getCategoryProductImages(missing.map((c) => c.id)).then((images) => {
+      if (cancelled) return;
+      setProductImages((prev) => ({ ...prev, ...images }));
+      setIsCategoriesLoading(false);
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMenuOpen, activeTabId, wpCategories]);
 
   // Derive tabs and subcategories from WP data
   const menuTabs = wpCategories
