@@ -1,273 +1,34 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { getNewProducts, getOnSaleProducts, getMainCategories, getProducts, getCategoryProductImages } from '@/lib/woocommerce';
-import ProductCard from '@/components/product/ProductCard';
-
-// Static categories for display (backup if API doesn't return images)
-const staticCategories = [
-  { name: 'Abaya', slug: 'abayas', image: '/categories/abaya.jpg' },
-  { name: 'Hijab', slug: 'hijabs', image: '/categories/hijab.jpg' },
-  { name: 'Jilbab', slug: 'jilbabs', image: '/categories/jilbab.jpg' },
-  { name: 'Khimar', slug: 'khimar', image: '/categories/khimar.jpg' },
-  { name: 'Robe', slug: 'robes', image: '/categories/robe.jpg' },
-  { name: 'Burkini', slug: 'burkini', image: '/categories/burkini.jpg' },
-];
+import { getNewProducts, getOnSaleProducts, getProducts, getCategories, getCategoryProductImages } from '@/lib/woocommerce';
+import HomeContent from '@/components/home/HomeContent';
 
 export default async function HomePage() {
-  // Fetch data from WooCommerce API
-  const [newProducts, saleProducts, categories, featuredProducts] = await Promise.all([
-    getNewProducts(8),
-    getOnSaleProducts(8),
-    getMainCategories(),
-    getProducts({ featured: true, per_page: 4 }),
+  // Fetch all categories + products broadly (enough to cover all tabs)
+  const [allCategories, newProducts, saleProducts, featuredProducts] = await Promise.all([
+    getCategories({ per_page: 100 }),
+    getNewProducts(50),
+    getOnSaleProducts(30),
+    getProducts({ featured: true, per_page: 20 }),
   ]);
 
-  // Get categories with images
-  const displayCategories = categories.length > 0
-    ? categories.filter((cat) => cat.count > 0).slice(0, 6)
-    : staticCategories;
-
-  // Fetch product images for categories (first product's image)
-  const categoryProductImages = categories.length > 0
-    ? await getCategoryProductImages(
-        displayCategories
-          .filter((c): c is typeof c & { id: number } => 'id' in c)
-          .map((c) => c.id)
-      )
-    : {};
+  // Pre-compute product images for Femme's subcategories (default tab, for SSR)
+  const femmeTab = allCategories.find((c) => c.slug === 'femme' && c.parent === 0);
+  const femmeSubcats = femmeTab
+    ? allCategories.filter((c) => c.parent === femmeTab.id && c.count > 0).slice(0, 6)
+    : [];
+  const initialProductImages = await getCategoryProductImages(femmeSubcats.map((c) => c.id));
 
   return (
     <div className="bg-white">
-      {/* Hero Section - Neyssa Style Full Width */}
-      <section className="relative h-[70vh] min-h-[500px] md:h-[85vh] md:max-h-[800px] overflow-hidden">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/hero-banner.jpg)',
-            backgroundColor: '#f5f1eb'
-          }}
-        />
+      {/* Dynamic content controlled by Femme/Homme/Enfant tabs */}
+      <HomeContent
+        initialCategories={allCategories}
+        initialNewProducts={newProducts}
+        initialFeaturedProducts={featuredProducts}
+        initialSaleProducts={saleProducts}
+        initialProductImages={initialProductImages}
+      />
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/20" />
-
-        {/* Content */}
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
-          <p className="text-white text-[11px] md:text-[13px] tracking-[0.3em] uppercase mb-4 md:mb-6">
-            Collection Printemps 2026
-          </p>
-
-          <h1 className="font-serif text-white text-[32px] md:text-[53px] lg:text-[64px] font-normal tracking-[0.08em] uppercase leading-[1.1] mb-6 md:mb-8">
-            Mode Modeste
-            <br />
-            Élégante
-          </h1>
-
-          <Link
-            href="/shop"
-            className="bg-white text-[#1a1a1a] px-8 md:px-12 py-3 md:py-4 text-[11px] md:text-[12px] font-semibold tracking-[0.2em] uppercase hover:bg-[#1a1a1a] hover:text-white transition-all duration-300"
-          >
-            Découvrir
-          </Link>
-        </div>
-      </section>
-
-      {/* Categories Grid */}
-      <section>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-            {displayCategories.map((category) => (
-              <Link
-                key={'id' in category ? category.id : category.slug}
-                href={`/category/${category.slug}`}
-                className="group relative aspect-[3/4] bg-[#f5f1eb] overflow-hidden"
-              >
-                {(() => {
-                  const productImg = 'id' in category ? categoryProductImages[category.id as number] : undefined;
-                  const catImg = 'image' in category && category.image && typeof category.image === 'object' && 'src' in category.image ? category.image.src : undefined;
-                  const imgSrc = productImg || catImg;
-                  return imgSrc ? (
-                    <Image
-                      src={imgSrc}
-                      alt={category.name}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
-                  );
-                })()}
-
-                {/* Category name */}
-                <div className="absolute inset-0 flex items-center justify-center p-4">
-                  <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase text-center">
-                    {category.name.replace(/&amp;/gi, '&')}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-      </section>
-
-      {/* New Arrivals - Neyssa Style */}
-      <section className="py-12 md:py-20 bg-[#faf8f5]">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between mb-10 md:mb-14">
-            <h2 className="font-serif text-[24px] md:text-[32px] tracking-[0.08em] uppercase">
-              Nouveautés
-            </h2>
-            <Link
-              href="/shop?orderby=date"
-              className="text-[12px] tracking-[0.1em] uppercase text-[#997a6e] hover:text-[#1a1a1a] transition-colors border-b border-[#997a6e] hover:border-[#1a1a1a] pb-0.5"
-            >
-              Voir tout
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {newProducts.slice(0, 8).map((product, index) => (
-              <ProductCard key={product.id} product={product} priority={index < 4} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Banner 1 - Neyssa Style */}
-      <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-abaya.jpg)',
-            backgroundColor: '#d4cdc5'
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
-
-        <div className="relative h-full flex items-center">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6 w-full">
-            <div className="max-w-[500px]">
-              <p className="text-white/80 text-[11px] tracking-[0.3em] uppercase mb-3">
-                Collection exclusive
-              </p>
-              <h2 className="font-serif text-white text-[28px] md:text-[42px] tracking-[0.05em] leading-[1.2] mb-4">
-                Abayas Dubai
-              </h2>
-              <p className="text-white/80 text-[14px] md:text-[15px] mb-6 leading-relaxed">
-                Découvrez notre sélection d&apos;abayas inspirées du style dubaïote, alliant élégance et raffinement.
-              </p>
-              <Link
-                href="/category/abaya-dubai"
-                className="inline-block bg-white text-[#1a1a1a] px-8 py-3 text-[11px] font-semibold tracking-[0.2em] uppercase hover:bg-[#997a6e] hover:text-white transition-all duration-300"
-              >
-                Découvrir
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Best Sellers */}
-      {featuredProducts.length > 0 && (
-        <section className="py-12 md:py-20">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-            <div className="flex items-center justify-between mb-10 md:mb-14">
-              <h2 className="font-serif text-[24px] md:text-[32px] tracking-[0.08em] uppercase">
-                Meilleures Ventes
-              </h2>
-              <Link
-                href="/shop?featured=true"
-                className="text-[12px] tracking-[0.1em] uppercase text-[#997a6e] hover:text-[#1a1a1a] transition-colors border-b border-[#997a6e] hover:border-[#1a1a1a] pb-0.5"
-              >
-                Voir tout
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Double Banner Section - Neyssa Style */}
-      <section className="grid md:grid-cols-2">
-        {/* Left Banner */}
-        <Link href="/category/hijabs" className="group relative h-[400px] md:h-[500px] overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-            style={{
-              backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-hijab.jpg)',
-              backgroundColor: '#e8dfd5'
-            }}
-          />
-          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <p className="text-white/80 text-[11px] tracking-[0.3em] uppercase mb-2">Collection</p>
-            <h3 className="font-serif text-white text-[28px] md:text-[36px] tracking-[0.08em] uppercase mb-4">
-              Hijabs
-            </h3>
-            <span className="bg-white text-[#1a1a1a] px-6 py-2.5 text-[10px] font-semibold tracking-[0.2em] uppercase group-hover:bg-[#997a6e] group-hover:text-white transition-all duration-300">
-              Explorer
-            </span>
-          </div>
-        </Link>
-
-        {/* Right Banner */}
-        <Link href="/category/jilbabs" className="group relative h-[400px] md:h-[500px] overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-            style={{
-              backgroundImage: 'url(https://wp.yelira.fr/wp-content/uploads/2024/01/banner-jilbab.jpg)',
-              backgroundColor: '#d4cdc5'
-            }}
-          />
-          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <p className="text-white/80 text-[11px] tracking-[0.3em] uppercase mb-2">Collection</p>
-            <h3 className="font-serif text-white text-[28px] md:text-[36px] tracking-[0.08em] uppercase mb-4">
-              Jilbabs
-            </h3>
-            <span className="bg-white text-[#1a1a1a] px-6 py-2.5 text-[10px] font-semibold tracking-[0.2em] uppercase group-hover:bg-[#997a6e] group-hover:text-white transition-all duration-300">
-              Explorer
-            </span>
-          </div>
-        </Link>
-      </section>
-
-      {/* Sale Section */}
-      {saleProducts.length > 0 && (
-        <section className="py-12 md:py-20 bg-[#faf8f5]">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-            <div className="flex items-center justify-between mb-10 md:mb-14">
-              <div>
-                <span className="text-[#c41e3a] text-[11px] tracking-[0.2em] uppercase font-semibold">
-                  Promotions
-                </span>
-                <h2 className="font-serif text-[24px] md:text-[32px] tracking-[0.08em] uppercase mt-1">
-                  Soldes
-                </h2>
-              </div>
-              <Link
-                href="/shop?on_sale=true"
-                className="text-[12px] tracking-[0.1em] uppercase text-[#c41e3a] hover:text-[#1a1a1a] transition-colors border-b border-[#c41e3a] hover:border-[#1a1a1a] pb-0.5"
-              >
-                Voir tout
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {saleProducts.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Trust Badges - Neyssa Style */}
+      {/* Trust Badges */}
       <section className="py-12 md:py-16 border-y border-gray-100">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
@@ -323,7 +84,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Section - Neyssa Style */}
+      {/* Newsletter */}
       <section className="py-16 md:py-24 bg-[#1a1a1a] text-white">
         <div className="max-w-[600px] mx-auto px-4 text-center">
           <h2 className="font-serif text-[24px] md:text-[32px] tracking-[0.08em] uppercase mb-4">
@@ -332,7 +93,6 @@ export default async function HomePage() {
           <p className="text-white/70 text-[14px] mb-8">
             Inscrivez-vous pour recevoir nos nouveautés et offres exclusives
           </p>
-
           <form className="flex flex-col sm:flex-row gap-3">
             <input
               type="email"
@@ -349,7 +109,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Instagram Section Placeholder */}
+      {/* Instagram */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="text-center mb-10">
@@ -360,7 +120,6 @@ export default async function HomePage() {
               Suivez-nous sur Instagram
             </h2>
           </div>
-
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <a

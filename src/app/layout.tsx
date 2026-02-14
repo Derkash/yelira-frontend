@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
+import { ActiveTabProvider } from '@/context/ActiveTabContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
@@ -74,9 +75,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <CartProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <ActiveTabProvider>
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+          </ActiveTabProvider>
         </CartProvider>
       </body>
     </html>

@@ -5,8 +5,9 @@ import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getCategories, getCategoryProductImages } from '@/lib/woocommerce';
 import type { Category } from '@/types/woocommerce';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useActiveTab, TabSlug } from '@/context/ActiveTabContext';
 
 // Search Modal Component
 function SearchModal({ onClose }: { onClose: () => void }) {
@@ -125,34 +126,51 @@ export default function Header() {
   const [wpCategories, setWpCategories] = useState<Category[]>([]);
   const [activeTabId, setActiveTabId] = useState<number | null>(null);
   const [productImages, setProductImages] = useState<Record<number, string>>({});
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
   const { cart } = useCart();
+  const { activeTab, setActiveTab } = useActiveTab();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const desktopTabLabels: Record<TabSlug, string> = { femme: 'Femme', homme: 'Homme', enfant: 'Enfant' };
+  const handleDesktopTabClick = (tab: TabSlug) => {
+    setActiveTab(tab);
+    if (pathname !== '/') router.push('/');
+  };
 
   // Slugs des catégories parentes qui servent d'onglets dans le menu
   const menuTabSlugs = ['femme', 'homme', 'enfant'];
 
   // Fetch all categories + first product images from WooCommerce
   const fetchCategories = useCallback(async () => {
+    setIsCategoriesLoading(true);
     try {
       const cats = await getCategories({ per_page: 100 });
       setWpCategories(cats);
-      // Set first tab as active
-      const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
-      if (firstTab) setActiveTabId(firstTab.id);
+      // Set "Femme" as default active tab
+      const femmeTab = cats.find((c) => c.slug === 'femme' && c.parent === 0);
+      if (femmeTab) {
+        setActiveTabId(femmeTab.id);
+      } else {
+        const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
+        if (firstTab) setActiveTabId(firstTab.id);
+      }
       // Fetch first product image for each non-parent category
       const childCats = cats.filter((c) => c.parent !== 0);
       const images = await getCategoryProductImages(childCats.map((c) => c.id));
       setProductImages(images);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
+    } finally {
+      setIsCategoriesLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Prefetch categories on mount so data is ready when menu opens
   useEffect(() => {
-    if (isMenuOpen && wpCategories.length === 0) {
-      fetchCategories();
-    }
-  }, [isMenuOpen, wpCategories.length, fetchCategories]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Derive tabs and subcategories from WP data
   const menuTabs = wpCategories
@@ -229,11 +247,11 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Line 2 - Logo (left) + Icons (right) */}
+        {/* Line 2 - Logo (left) + Desktop Tabs (center) + Icons (right) */}
         <div className="bg-white border-b border-gray-100">
           <div className="max-w-[var(--container-max)] mx-auto px-4 lg:px-6 flex items-center justify-between h-14 lg:h-16">
             {/* Logo */}
-            <Link href="/" aria-label="Yelira - Accueil">
+            <Link href="/" aria-label="Yelira - Accueil" className="flex-shrink-0">
               <Image
                 src="/images/brand/logo.svg"
                 alt="Yelira"
@@ -244,8 +262,25 @@ export default function Header() {
               />
             </Link>
 
+            {/* Desktop Tabs — Femme / Homme / Enfant (hidden on mobile) */}
+            <nav className="hidden lg:flex items-center gap-8" aria-label="Catégories principales">
+              {(['femme', 'homme', 'enfant'] as TabSlug[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleDesktopTabClick(tab)}
+                  className={`text-[13px] font-bold tracking-[0.12em] uppercase py-1 transition-colors ${
+                    activeTab === tab
+                      ? 'text-[var(--yelira-black)] border-b-2 border-[var(--yelira-black)]'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  {desktopTabLabels[tab]}
+                </button>
+              ))}
+            </nav>
+
             {/* Icons: Wishlist, Account, Cart, Burger */}
-            <nav aria-label="Actions rapides" className="flex items-center gap-0.5 lg:gap-1">
+            <nav aria-label="Actions rapides" className="flex items-center gap-0.5 lg:gap-1 flex-shrink-0">
               {/* Wishlist (heart) */}
               <Link
                 href="/wishlist"
@@ -384,7 +419,16 @@ export default function Header() {
 
             {/* Subcategories grid — dynamique */}
             <div className="flex-1 overflow-y-auto px-4 py-6">
-              {activeSubcategories.length > 0 ? (
+              {isCategoriesLoading ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 animate-pulse">
+                      <div className="w-16 h-16 flex-shrink-0 bg-gray-200 rounded" />
+                      <div className="h-3 bg-gray-200 rounded w-20" />
+                    </div>
+                  ))}
+                </div>
+              ) : activeSubcategories.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4">
                   {activeSubcategories.map((cat) => (
                     <Link
@@ -412,11 +456,7 @@ export default function Header() {
                     </Link>
                   ))}
                 </div>
-              ) : (
-                <p className="text-center text-gray-400 text-sm py-12">
-                  Bientôt disponible
-                </p>
-              )}
+              ) : null}
             </div>
 
             {/* Footer links */}
