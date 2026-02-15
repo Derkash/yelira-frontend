@@ -29,6 +29,9 @@ export async function generateStaticParams() {
   }
 }
 
+// Allow dynamic rendering for products not in generateStaticParams
+export const dynamicParams = true;
+
 // Dynamic metadata for SEO
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;

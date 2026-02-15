@@ -57,6 +57,8 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#1a1a1a" />
+        <link rel="preconnect" href="https://wp.yelira.fr" />
+        <link rel="dns-prefetch" href="https://wp.yelira.fr" />
         <OrganizationJsonLd
           name="Yelira"
           url="https://www.yelira.fr"

@@ -16,8 +16,10 @@ interface CategoryPageProps {
   searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const hasFilters = resolvedSearchParams.sort || (resolvedSearchParams.page && resolvedSearchParams.page !== '1');
 
   try {
     const category = await getCategory(slug);
@@ -49,6 +51,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       alternates: {
         canonical: `https://www.yelira.fr/category/${slug}`,
       },
+      ...(hasFilters && {
+        robots: { index: false, follow: true },
+      }),
     };
   } catch {
     return { title: 'Catégorie | Yelira' };
