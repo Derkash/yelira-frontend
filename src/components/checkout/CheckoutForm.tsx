@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/woocommerce';
+import { trackBeginCheckout } from '@/lib/analytics';
 import OrderSummary from './OrderSummary';
 
 const stripePromise = loadStripe(
@@ -141,6 +142,15 @@ function CheckoutFormInner() {
   const [note, setNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const checkoutTracked = useRef(false);
+
+  // Track begin_checkout once when checkout page loads with items
+  useEffect(() => {
+    if (cart.items.length > 0 && !checkoutTracked.current) {
+      trackBeginCheckout(cart.items, cart.total);
+      checkoutTracked.current = true;
+    }
+  }, [cart.items, cart.total]);
 
   // Redirect to cart if empty
   if (cart.items.length === 0) {

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { formatPrice, calculateDiscount } from '@/lib/woocommerce';
+import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import type { Product, Variation } from '@/types/woocommerce';
 
 interface ProductDetailsProps {
@@ -18,6 +19,11 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const galleryRef = useRef<HTMLDivElement>(null);
+
+  // Track view_item on mount
+  useEffect(() => {
+    trackViewItem(product);
+  }, [product]);
 
   // Track active image in mobile carousel via IntersectionObserver
   useEffect(() => {
@@ -76,6 +82,7 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
 
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedVariation || undefined, selectedAttributes);
+    trackAddToCart(product, quantity, selectedVariation || undefined);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 3000);
   };

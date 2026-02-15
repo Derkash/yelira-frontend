@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { searchProducts } from '@/lib/woocommerce';
 import ProductCard from '@/components/product/ProductCard';
+import SearchTracker from '@/components/analytics/SearchTracker';
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
 }
@@ -14,6 +15,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="min-h-screen bg-white">
+      {query && <SearchTracker query={query} resultsCount={products.length} />}
       {/* Results */}
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-4 pb-12 md:py-12">
         {query ? (

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Product, CartItem, Cart, Variation } from '@/types/woocommerce';
+import { trackRemoveFromCart } from '@/lib/analytics';
 
 // Cart Actions
 type CartAction =
@@ -137,6 +138,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = (id: number, variationId?: number) => {
+    const item = cart.items.find(
+      (i) => i.id === id && (variationId ? i.variation?.id === variationId : !i.variation)
+    );
+    if (item) {
+      trackRemoveFromCart(item.product, item.quantity, item.variation);
+    }
     dispatch({ type: 'REMOVE_ITEM', payload: { id, variationId } });
   };
 

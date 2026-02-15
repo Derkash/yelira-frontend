@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/woocommerce';
+import { trackPurchase } from '@/lib/analytics';
 import type { Order } from '@/types/checkout';
 
 function ConfirmationContent() {
@@ -38,9 +39,10 @@ function ConfirmationContent() {
         const data = await resp.json();
         setOrder(data);
 
-        // Clear cart once
+        // Clear cart and track purchase once
         if (!cartCleared) {
           clearCart();
+          trackPurchase(data);
           setCartCleared(true);
         }
       } catch (err) {
