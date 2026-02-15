@@ -16,7 +16,7 @@ export default function CategoryFilters({ currentSort, productCount, slug }: Cat
   };
 
   return (
-    <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
       <p className="text-[13px] text-gray-600">
         {productCount} produit{productCount > 1 ? 's' : ''}
       </p>

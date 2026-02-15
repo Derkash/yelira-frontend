@@ -10,12 +10,17 @@ export default async function HomePage() {
     getProducts({ featured: true, per_page: 20 }),
   ]);
 
-  // Pre-compute product images for Femme's subcategories (default tab, for SSR)
-  const femmeTab = allCategories.find((c) => c.slug === 'femme' && c.parent === 0);
-  const femmeSubcats = femmeTab
-    ? allCategories.filter((c) => c.parent === femmeTab.id && c.count > 0).slice(0, 6)
-    : [];
-  const initialProductImages = await getCategoryProductImages(femmeSubcats.map((c) => c.id));
+  // Pre-compute product images for all tabs (femme, homme, enfant)
+  const tabSlugs = ['femme', 'homme', 'enfant'];
+  const allSubcatIds = tabSlugs.flatMap((slug) => {
+    const tab = allCategories.find((c) => c.slug === slug && c.parent === 0);
+    if (!tab) return [];
+    return allCategories
+      .filter((c) => c.parent === tab.id && c.count > 0)
+      .slice(0, 6)
+      .map((c) => c.id);
+  });
+  const initialProductImages = await getCategoryProductImages(allSubcatIds);
 
   return (
     <div className="bg-white">

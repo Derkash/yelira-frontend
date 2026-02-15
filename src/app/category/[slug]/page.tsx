@@ -129,14 +129,14 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         )}
 
         {/* Category Title */}
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-3 md:pt-10">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-2 md:pt-3">
           <h1 className="font-serif text-[28px] md:text-[42px] tracking-[0.05em] uppercase text-[#1a1a1a]">
             {category.name}
           </h1>
         </div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          {/* SEO Intro Text - Collapsible like Neyssa Shop */}
+          {/* SEO Intro Text - Collapsible */}
           {catDesc && (
             <CollapsibleIntro
               title={catDesc.introTitle}
@@ -144,45 +144,68 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             />
           )}
 
-          {/* Subcategories */}
+          {/* Subcategory Slider (Uniqlo-style) */}
           {subcategories.length > 0 && (
-            <div className="py-8 md:py-10">
-              <h2 className="font-serif text-[20px] md:text-[24px] tracking-[0.05em] mb-6">
-                Sous-catégories
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                {subcategories.map((subcat) => (
-                  <Link
-                    key={subcat.id}
-                    href={`/category/${subcat.slug}`}
-                    className="group relative aspect-[4/3] bg-[#f5f1eb] overflow-hidden"
-                  >
-                    {(subcatProductImages[subcat.id] || subcat.image) ? (
+            <div className="py-2 md:py-3">
+              <div className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 md:-mx-6 md:px-6">
+                {/* "Toute la collection" - first item, always active on current page */}
+                <Link
+                  href={`/category/${slug}`}
+                  className="flex-shrink-0 group"
+                >
+                  <div className="relative w-[80px] h-[80px] md:w-[90px] md:h-[90px] rounded-full overflow-hidden bg-[#f5f1eb] ring-2 ring-[#1a1a1a] ring-offset-2">
+                    {category.image ? (
                       <Image
-                        src={subcatProductImages[subcat.id] || subcat.image!.src}
-                        alt={subcat.name}
+                        src={category.image.src}
+                        alt={category.name}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-[#997a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                      </div>
                     )}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-                      <span className="font-serif text-white text-[13px] md:text-[15px] tracking-[0.1em] uppercase">
+                  </div>
+                  <p className="text-[11px] md:text-[12px] text-center mt-2 font-semibold text-[#1a1a1a] max-w-[80px] md:max-w-[90px] leading-tight">
+                    Tout voir
+                  </p>
+                </Link>
+
+                {/* Subcategory items */}
+                {subcategories.map((subcat) => {
+                  const imgSrc = subcatProductImages[subcat.id] || subcat.image?.src;
+                  return (
+                    <Link
+                      key={subcat.id}
+                      href={`/category/${subcat.slug}`}
+                      className="flex-shrink-0 group"
+                    >
+                      <div className="relative w-[80px] h-[80px] md:w-[90px] md:h-[90px] rounded-full overflow-hidden bg-[#f5f1eb] ring-1 ring-gray-200 group-hover:ring-[#1a1a1a] group-hover:ring-2 transition-all ring-offset-1">
+                        {imgSrc ? (
+                          <Image
+                            src={imgSrc}
+                            alt={subcat.name}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
+                        )}
+                      </div>
+                      <p className="text-[11px] md:text-[12px] text-center mt-2 text-gray-700 group-hover:text-[#1a1a1a] transition-colors max-w-[80px] md:max-w-[90px] leading-tight">
                         {subcat.name}
-                      </span>
-                      <span className="text-white/70 text-[11px] mt-1">
-                        {subcat.count} produit{subcat.count > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                      </p>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          <div className={subcategories.length > 0 ? '' : 'pt-8 md:pt-10'}>
+          <div className={subcategories.length > 0 ? '' : 'pt-2 md:pt-3'}>
             {/* Filters Bar */}
             <CategoryFilters
               currentSort={sort}

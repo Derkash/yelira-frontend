@@ -221,6 +221,260 @@ export const seoContent: Record<string, SeoContent> = {
     ]),
   },
 
+  'khimars': {
+    guideTitle: 'Guide du khimar : longueurs, matières et styles',
+    sections: [
+      {
+        title: 'Qu\'est-ce qu\'un khimar ?',
+        html: `<p>Le <strong>khimar</strong> est un voile long qui couvre la tête, le cou, les épaules et descend sur la poitrine. Plus couvrant qu'un hijab classique, il offre une solution de couverture ample et élégante.</p>
+<p>Le khimar est mentionné dans le <strong>Coran (sourate An-Nur, verset 31)</strong>. C'est un vêtement qui a toujours fait partie de la tradition vestimentaire de la femme musulmane, et qui se décline aujourd'hui dans de nombreux styles et longueurs.</p>`,
+      },
+      {
+        title: 'Les longueurs de khimar',
+        html: `<ul>
+<li><strong>Khimar court</strong> : couvre tête, cou et épaules. Pratique au quotidien, il se porte par-dessus une abaya ou une tenue couvrante.</li>
+<li><strong>Khimar mi-long</strong> : descend jusqu'à la taille. Un bon compromis entre couverture et praticité.</li>
+<li><strong>Khimar long</strong> : descend sous la taille voire jusqu'aux hanches. La couverture la plus ample pour une pudeur maximale.</li>
+</ul>
+<p>Associé à une <strong>jupe longue</strong> ou un <strong>sarouel</strong>, le khimar compose un ensemble complet et harmonieux.</p>`,
+      },
+    ],
+    faq: [
+      { question: 'Quelle différence entre khimar et hijab ?', answer: 'Le hijab est un voile qui couvre la tête et le cou. Le khimar est plus long et descend sur les épaules et la poitrine, offrant une couverture plus ample. Le khimar intègre la fonctionnalité du hijab tout en couvrant davantage.' },
+      { question: 'Comment porter un khimar ?', answer: 'Le khimar s\'enfile simplement par-dessus la tête. Il ne nécessite généralement pas d\'épingles. Portez-le par-dessus une abaya, une jupe longue ou un sarouel pour un ensemble complet.' },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Khimar Court', type: 'category', slug: 'khimar-court' },
+      { label: 'Khimar Long', type: 'category', slug: 'khimar-long' },
+      { label: 'Khimar Soie de Médine', type: 'category', slug: 'khimar-soie-de-medine' },
+      { label: 'Jilbabs', type: 'category', slug: 'jilbabs' },
+      { label: 'Hijabs', type: 'category', slug: 'hijabs' },
+    ]),
+  },
+
+  'tenues-de-priere': {
+    guideTitle: 'Guide des tenues de prière : choisir et entretenir',
+    sections: [
+      {
+        title: 'L\'importance de la tenue de prière',
+        html: `<p>La <strong>tenue de prière</strong> est un vêtement dédié à la salat qui assure une couverture complète et un confort optimal pendant les cinq prières quotidiennes. Elle doit couvrir tout le corps sauf le visage et les mains.</p>
+<p>Une bonne tenue de prière doit être <strong>ample</strong> pour ne pas gêner les mouvements (ruku, sujud), <strong>opaque</strong> pour une couverture efficace, et <strong>confortable</strong> pour permettre la concentration spirituelle.</p>`,
+      },
+      {
+        title: 'Les types de tenues de prière',
+        html: `<ul>
+<li><strong>Robe de prière à hijab intégré</strong> : la plus pratique, s'enfile en un geste. Idéale à la maison et en voyage.</li>
+<li><strong>Ensemble de prière 2 pièces</strong> : voile + jupe. Modulable et facile à ranger.</li>
+<li><strong>Jilbab de prière</strong> : couverture intégrale d'un seul tenant. La solution la plus couvrante.</li>
+<li><strong>Tapis de prière</strong> : complément essentiel pour prier confortablement partout.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { question: 'Quelle tenue pour prier à la maison ?', answer: 'La robe de prière à hijab intégré est idéale pour la maison : elle s\'enfile en quelques secondes quand l\'heure de la prière arrive. Choisissez une matière douce et confortable.' },
+      { question: 'Peut-on prier avec une abaya ?', answer: 'Oui, à condition que l\'abaya soit suffisamment couvrante (opaque, ample) et qu\'elle soit portée avec un hijab. Une abaya simple avec un hijab constitue une tenue de prière valide.' },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Robe Prière Hijab Intégré', type: 'category', slug: 'robe-priere-hijab-integre' },
+      { label: 'Ensemble de Prière', type: 'category', slug: 'ensemble-de-priere' },
+      { label: 'Tapis de Prière', type: 'category', slug: 'tapis-de-priere' },
+      { label: 'Jilbabs', type: 'category', slug: 'jilbabs' },
+    ]),
+  },
+
+  'mariage-occasions': {
+    guideTitle: 'Guide des tenues modestes pour mariages et occasions',
+    sections: [
+      {
+        title: 'S\'habiller pour un mariage musulman',
+        html: `<p>Le <strong>mariage musulman</strong> est une célébration qui mérite une tenue d'exception. Que vous soyez la mariée ou une invitée, la mode modeste offre d'innombrables possibilités pour briller avec pudeur.</p>
+<p>Pour la <strong>mariée</strong> : abayas en satin, soie ou organza, dans des teintes blanches, ivoire ou champagne. Les broderies, perles et cristaux apportent la touche de luxe. Pour les <strong>invitées</strong> : optez pour des couleurs élégantes (bordeaux, vert émeraude, bleu nuit) et des matières nobles.</p>`,
+      },
+      {
+        title: 'Les occasions spéciales dans l\'islam',
+        html: `<ul>
+<li><strong>Aïd el-Fitr</strong> : fin du Ramadan, c'est la fête des récompenses. On porte des tenues neuves et colorées.</li>
+<li><strong>Aïd el-Adha</strong> : fête du sacrifice, les tenues sont souvent plus sobres mais élégantes.</li>
+<li><strong>Ramadan</strong> : le mois sacré appelle des tenues confortables pour les tarawih et les iftar en famille.</li>
+<li><strong>Henna / Henné</strong> : la soirée henné avant le mariage est l'occasion de porter des caftans et tenues traditionnelles.</li>
+</ul>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Abaya Mariage', type: 'category', slug: 'abaya-mariage' },
+      { label: 'Tenue Aïd', type: 'category', slug: 'tenue-aid-ramadan' },
+      { label: 'Abaya Soirée', type: 'category', slug: 'abaya-soiree-fete' },
+      { label: 'Caftan Djellaba', type: 'category', slug: 'caftan-djellaba' },
+      { label: 'Abayas', type: 'category', slug: 'abayas' },
+    ]),
+  },
+
+  'pret-a-porter': {
+    guideTitle: 'Le prêt-à-porter modeste : conseils et tendances',
+    sections: [
+      {
+        title: 'La mode modeste au quotidien',
+        html: `<p>Le <strong>prêt-à-porter modeste</strong> propose des vêtements tendance qui respectent les codes de la pudeur : manches longues, longueurs couvrantes, coupes amples. C'est la mode du quotidien pour la femme musulmane active.</p>
+<p>Robes longues, ensembles coordonnés, tuniques, jupes et pantalons palazzo composent une garde-robe polyvalente et stylée. Ces pièces se portent seules ou se mixent avec vos abayas et hijabs pour des looks variés.</p>`,
+      },
+      {
+        title: 'Composer sa garde-robe modeste',
+        html: `<ul>
+<li><strong>Les basiques</strong> : tuniques noires et beiges, pantalons palazzo, jupes droites</li>
+<li><strong>Les pièces fortes</strong> : robe longue imprimée, ensemble coloré, combinaison</li>
+<li><strong>Les superpositions</strong> : veste longue, manteau, kimono ouvert</li>
+<li><strong>Les accessoires</strong> : ceintures pour structurer, bijoux pour sublimer</li>
+</ul>
+<p><strong>Astuce</strong> : investissez dans des basiques de qualité en couleurs neutres, puis ajoutez des pièces tendance chaque saison pour renouveler vos looks.</p>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Robes Longues', type: 'category', slug: 'robes-longues' },
+      { label: 'Ensembles', type: 'category', slug: 'ensembles-combinaisons' },
+      { label: 'Tuniques', type: 'category', slug: 'tuniques-chemises' },
+      { label: 'Jupes Longues', type: 'category', slug: 'jupes-longues' },
+      { label: 'Pantalons Palazzo', type: 'category', slug: 'pantalons-palazzo' },
+      { label: 'Abayas', type: 'category', slug: 'abayas' },
+    ]),
+  },
+
+  'omra-hajj-femme': {
+    guideTitle: 'Préparer sa tenue pour l\'Omra et le Hajj',
+    sections: [
+      {
+        title: 'Les règles vestimentaires du pèlerinage',
+        html: `<p>Contrairement aux hommes qui doivent porter l'ihram (deux pièces de tissu blanc), la femme n'a <strong>pas de tenue spécifique obligatoire</strong> pour le Hajj et l'Omra. Elle doit simplement porter des vêtements modestes qui couvrent tout le corps sauf le visage et les mains.</p>
+<p>Cependant, certaines recommandations s'appliquent : privilégier les <strong>couleurs claires</strong> (blanc, beige) pour refléter la chaleur, choisir des <strong>matières respirantes</strong> adaptées au climat saoudien, et opter pour des vêtements <strong>faciles à enfiler</strong> pour les ablutions fréquentes.</p>`,
+      },
+      {
+        title: 'Checklist pèlerinage femme',
+        html: `<ul>
+<li><strong>2-3 abayas blanches ou claires</strong> en matière respirante</li>
+<li><strong>Hijabs légers</strong> en coton ou soie de Médine</li>
+<li><strong>Ensemble de prière voyage</strong> compact et pliable</li>
+<li><strong>Sous-abayas</strong> en coton pour le confort</li>
+<li><strong>Chaussures confortables</strong> faciles à enfiler et retirer</li>
+<li><strong>Tapis de prière voyage</strong> léger</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { question: 'Quelle couleur porter pour l\'Omra ?', answer: 'Il n\'y a pas de couleur obligatoire pour la femme. Cependant, le blanc et les couleurs claires sont privilégiés car ils reflètent la chaleur et symbolisent la pureté. Le noir est aussi acceptable.' },
+      { question: 'Peut-on porter du parfum pendant la Omra ?', answer: 'En état d\'ihram (sacralisation), il est déconseillé d\'utiliser du parfum. Hors de l\'état d\'ihram, c\'est autorisé. Consultez un savant pour plus de détails selon votre situation.' },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Abaya Omra', type: 'category', slug: 'abaya-omra' },
+      { label: 'Tenue Blanche Hajj', type: 'category', slug: 'tenue-blanche-hajj' },
+      { label: 'Ensemble Prière Voyage', type: 'category', slug: 'ensemble-priere-voyage' },
+      { label: 'Abaya Blanche', type: 'category', slug: 'abaya-blanche' },
+    ]),
+  },
+
+  'qamis': {
+    guideTitle: 'Guide du qamis : styles, matières et entretien',
+    sections: [
+      {
+        title: 'Le qamis dans la tradition musulmane',
+        html: `<p>Le <strong>qamis</strong> (aussi appelé thobe, dishdasha ou kandura selon les régions) est la tenue traditionnelle de l'homme musulman. Cette longue tunique qui descend jusqu'aux chevilles est portée dans tout le monde musulman, avec des variations de style selon les pays.</p>
+<p>Le Prophète Muhammad (paix et bénédictions sur lui) portait le qamis et a recommandé aux hommes de porter des vêtements qui ne descendent pas sous les chevilles. C'est un vêtement qui allie <strong>tradition prophétique</strong> et <strong>élégance</strong>.</p>`,
+      },
+      {
+        title: 'Les styles de qamis',
+        html: `<ul>
+<li><strong>Qamis saoudien</strong> : blanc, col mandarin, coupe droite et sobre. Le classique par excellence.</li>
+<li><strong>Qamis émirati</strong> : col ouvert, parfois avec des boutons. Plus décontracté.</li>
+<li><strong>Qamis marocain</strong> : col en V ou rond, parfois avec des broderies. Style maghrébin.</li>
+<li><strong>Qamis moderne</strong> : coupes ajustées, couleurs variées, cols innovants. Pour un look contemporain.</li>
+</ul>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Qamis Blanc Saoudien', type: 'category', slug: 'qamis-blanc-saoudien' },
+      { label: 'Qamis Moderne', type: 'category', slug: 'qamis-moderne-couleur' },
+      { label: 'Abaya Homme', type: 'category', slug: 'abaya-homme' },
+      { label: 'Ihram', type: 'category', slug: 'ihram' },
+    ]),
+  },
+
+  'abaya-homme': {
+    guideTitle: 'L\'abaya homme : guide complet',
+    sections: [
+      {
+        title: 'L\'abaya masculine',
+        html: `<p>L'<strong>abaya homme</strong> (aussi appelée bisht dans certaines régions) est une tunique ample portée par-dessus le qamis ou les vêtements du quotidien. Plus drapée que le qamis, elle confère une allure majestueuse et distinguée.</p>
+<p>Traditionnellement portée pour les occasions spéciales dans le Golfe persique, l'abaya homme est de plus en plus adoptée au quotidien dans le monde musulman pour son élégance et sa couverture ample.</p>`,
+      },
+      {
+        title: 'Comment porter l\'abaya homme',
+        html: `<ul>
+<li><strong>Au quotidien</strong> : choisissez une abaya en crêpe ou nidha, couleur sobre (noir, blanc, gris)</li>
+<li><strong>Pour la prière du vendredi</strong> : un modèle blanc ou clair en matière de qualité</li>
+<li><strong>Pour les occasions</strong> : optez pour des matières nobles avec des finitions soignées</li>
+</ul>
+<p>L'abaya homme se porte ouverte sur le devant, par-dessus un qamis ou des vêtements classiques.</p>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Abaya Homme Noire', type: 'category', slug: 'abaya-homme-noire' },
+      { label: 'Abaya Homme Blanche', type: 'category', slug: 'abaya-homme-blanche' },
+      { label: 'Qamis', type: 'category', slug: 'qamis' },
+      { label: 'Ihram', type: 'category', slug: 'ihram' },
+    ]),
+  },
+
+  'fille': {
+    guideTitle: 'Mode modeste pour les filles : guide et conseils',
+    sections: [
+      {
+        title: 'Initier les petites à la mode modeste',
+        html: `<p>Habiller sa fille en mode modeste est un beau geste d'éducation qui peut être ludique et joyeux. Les vêtements modestes pour enfants doivent avant tout être <strong>confortables</strong>, <strong>pratiques</strong> et <strong>adaptés à leur âge</strong>.</p>
+<p>Chez Yelira, nos collections fille proposent des abayas adorables, des robes de prière colorées et des burkinis fun. Des vêtements à l'image de maman qui donnent envie d'être portés.</p>`,
+      },
+      {
+        title: 'Conseils pour habiller sa fille',
+        html: `<ul>
+<li><strong>Privilégiez le confort</strong> : matières douces, coupes amples pour jouer librement</li>
+<li><strong>Choisissez des couleurs joyeuses</strong> : roses, pastels, motifs enfantins</li>
+<li><strong>Optez pour la praticité</strong> : vêtements faciles à enfiler et à entretenir</li>
+<li><strong>Créez de la complicité</strong> : les combos mère-fille assortis sont adorables</li>
+</ul>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Abaya Fille', type: 'category', slug: 'abaya-fille' },
+      { label: 'Robe Prière Fille', type: 'category', slug: 'robe-priere-fille' },
+      { label: 'Burkini Fille', type: 'category', slug: 'burkini-fille' },
+      { label: 'Combo Mère-Fille', type: 'category', slug: 'combo-mere-fille' },
+    ]),
+  },
+
+  'combo-mere-fille': {
+    guideTitle: 'Les combos mère-fille : idées et inspiration',
+    sections: [
+      {
+        title: 'La tendance du matching mère-fille',
+        html: `<p>Les <strong>tenues assorties mère-fille</strong> sont une tendance adorable qui renforce le lien de complicité entre la maman et sa fille. Porter le même modèle en version adulte et enfant crée des moments précieux et des souvenirs photographiques inoubliables.</p>
+<p>Chez Yelira, nos combos sont pensés pour être à la fois élégants et confortables. Même tissu, même design, adaptés à chaque morphologie.</p>`,
+      },
+      {
+        title: 'Occasions pour porter un combo',
+        html: `<ul>
+<li><strong>L'Aïd</strong> : le moment parfait pour sortir les tenues assorties</li>
+<li><strong>Les mariages</strong> : pour briller en duo</li>
+<li><strong>La prière</strong> : avec nos ensembles de prière mère-fille</li>
+<li><strong>Le quotidien</strong> : pour le plaisir de se ressembler</li>
+<li><strong>Les photos</strong> : shooting famille assorti</li>
+</ul>`,
+      },
+    ],
+    relatedLinks: makeLinks([
+      { label: 'Abaya Mère-Fille', type: 'category', slug: 'abaya-mere-fille' },
+      { label: 'Prière Mère-Fille', type: 'category', slug: 'priere-mere-fille' },
+      { label: 'Abaya Fille', type: 'category', slug: 'abaya-fille' },
+      { label: 'Abayas', type: 'category', slug: 'abayas' },
+    ]),
+  },
+
   // ============================================================
   // SEO PAGES
   // ============================================================

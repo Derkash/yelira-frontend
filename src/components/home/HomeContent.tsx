@@ -137,7 +137,7 @@ export default function HomeContent({
                     <div className="absolute inset-0 bg-gradient-to-br from-[#f5f1eb] to-[#e8e4dc]" />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center p-4">
-                    <span className="font-serif text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase text-center">
+                    <span className="font-display font-bold text-[#1a1a1a] text-[14px] md:text-[16px] tracking-[0.15em] uppercase text-center bg-white/30 px-3 py-1.5 rounded">
                       {category.name}
                     </span>
                   </div>

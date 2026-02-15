@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { getCategories, getCategoryProductImages } from '@/lib/woocommerce';
+import { useState, useEffect, useRef } from 'react';
+import { getCategoryProductImages } from '@/lib/woocommerce';
 import type { Category } from '@/types/woocommerce';
 import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
@@ -119,14 +119,28 @@ const announcementMessages = [
   'Retours gratuits sous 14 jours',
 ];
 
-export default function Header() {
+interface HeaderProps {
+  initialCategories?: Category[];
+  initialImages?: Record<number, string>;
+}
+
+export default function Header({ initialCategories = [], initialImages = {} }: HeaderProps) {
+  const menuTabSlugs = ['femme', 'homme', 'enfant'];
+
+  // Compute initial active tab from server-provided categories
+  const initialActiveTabId = (() => {
+    const femme = initialCategories.find((c) => c.slug === 'femme' && c.parent === 0);
+    if (femme) return femme.id;
+    const first = initialCategories.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
+    return first?.id ?? null;
+  })();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [wpCategories, setWpCategories] = useState<Category[]>([]);
-  const [activeTabId, setActiveTabId] = useState<number | null>(null);
-  const [productImages, setProductImages] = useState<Record<number, string>>({});
-  const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
+  const [wpCategories] = useState<Category[]>(initialCategories);
+  const [activeTabId, setActiveTabId] = useState<number | null>(initialActiveTabId);
+  const [productImages, setProductImages] = useState<Record<number, string>>(initialImages);
   const { cart } = useCart();
   const { activeTab, setActiveTab } = useActiveTab();
   const pathname = usePathname();
@@ -138,48 +152,16 @@ export default function Header() {
     if (pathname !== '/') router.push('/');
   };
 
-  // Slugs des catégories parentes qui servent d'onglets dans le menu
-  const menuTabSlugs = ['femme', 'homme', 'enfant'];
-
-  // Fetch category list only on mount (single fast API call)
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchCats() {
-      try {
-        const cats = await getCategories({ per_page: 100 });
-        if (cancelled) return;
-        setWpCategories(cats);
-        const femmeTab = cats.find((c) => c.slug === 'femme' && c.parent === 0);
-        if (femmeTab) {
-          setActiveTabId(femmeTab.id);
-        } else {
-          const firstTab = cats.find((c) => menuTabSlugs.includes(c.slug) && c.parent === 0);
-          if (firstTab) setActiveTabId(firstTab.id);
-        }
-      } catch (err) {
-        console.error('Failed to fetch categories:', err);
-      }
-    }
-    fetchCats();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Lazy-load product images only when menu opens, per active tab
   useEffect(() => {
     if (!isMenuOpen || !activeTabId || wpCategories.length === 0) return;
     const subcats = wpCategories.filter((c) => c.parent === activeTabId);
     const missing = subcats.filter((c) => !productImages[c.id] && !c.image?.src);
-    if (missing.length === 0) {
-      setIsCategoriesLoading(false);
-      return;
-    }
-    setIsCategoriesLoading(true);
+    if (missing.length === 0) return;
     let cancelled = false;
     getCategoryProductImages(missing.map((c) => c.id)).then((images) => {
       if (cancelled) return;
       setProductImages((prev) => ({ ...prev, ...images }));
-      setIsCategoriesLoading(false);
     });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -432,16 +414,7 @@ export default function Header() {
 
             {/* Subcategories grid — dynamique */}
             <div className="flex-1 overflow-y-auto px-4 py-6">
-              {isCategoriesLoading ? (
-                <div className="grid grid-cols-2 gap-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 animate-pulse">
-                      <div className="w-16 h-16 flex-shrink-0 bg-gray-200 rounded" />
-                      <div className="h-3 bg-gray-200 rounded w-20" />
-                    </div>
-                  ))}
-                </div>
-              ) : activeSubcategories.length > 0 ? (
+              {activeSubcategories.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4">
                   {activeSubcategories.map((cat) => (
                     <Link
@@ -463,7 +436,7 @@ export default function Header() {
                           <div className="w-full h-full bg-[var(--yelira-beige)]" />
                         )}
                       </div>
-                      <span className="text-[13px] font-medium text-[var(--yelira-black)]">
+                      <span className="text-[13px] font-display font-bold text-[var(--yelira-black)]">
                         {cat.name}
                       </span>
                     </Link>
