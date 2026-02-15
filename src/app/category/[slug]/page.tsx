@@ -147,7 +147,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           {/* Subcategory Slider (Uniqlo-style) */}
           {subcategories.length > 0 && (
             <div className="py-2 md:py-3">
-              <div className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 md:-mx-6 md:px-6">
+              <div className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pt-1 pb-2 -mx-4 px-4 md:-mx-6 md:px-6">
                 {/* "Toute la collection" - first item, always active on current page */}
                 <Link
                   href={`/category/${slug}`}
