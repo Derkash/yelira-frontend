@@ -5,6 +5,7 @@ import { ActiveTabProvider } from '@/context/ActiveTabContext';
 import HeaderWithData from '@/components/layout/HeaderWithData';
 import Footer from '@/components/layout/Footer';
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.yelira.fr'),
@@ -72,6 +73,7 @@ export default function RootLayout({
           description="Boutique en ligne de mode modeste pour femmes musulmanes"
           searchUrl="https://www.yelira.fr/search?q={search_term_string}"
         />
+        <GoogleAnalytics gaId="G-NMNN878W2W" />
       </head>
       <body className="antialiased">
         <CartProvider>
